@@ -1,0 +1,78 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+/* Expose the token values as Tailwind theme variables so you can use
+   utilities like bg-cream, text-cocoa, bg-tangerine-deep, rounded-lg,
+   font-display, etc. Tailwind v4. If you're not using Tailwind, delete
+   this file and use tokens.css directly. */
+
+@theme inline {
+  --color-cream: var(--color-cream);
+  --color-cream-deep: var(--color-cream-deep);
+  --color-card: var(--color-card);
+  --color-cream-bright: var(--color-cream-bright);
+
+  --color-cocoa: var(--color-cocoa);
+  --color-cocoa-soft: var(--color-cocoa-soft);
+  --color-cocoa-faint: var(--color-cocoa-faint);
+
+  --color-tangerine: var(--color-tangerine);
+  --color-tangerine-deep: var(--color-tangerine-deep);
+
+  --color-teal: var(--color-teal);
+  --color-teal-deep: var(--color-teal-deep);
+  --color-teal-soft: var(--color-teal-soft);
+
+  --color-butter: var(--color-butter);
+  --color-butter-deep: var(--color-butter-deep);
+
+  --color-scrim-on-tangerine: var(--color-scrim-on-tangerine);
+
+  --color-tint-peach: var(--tint-peach);
+  --color-tint-teal-soft: var(--tint-teal-soft);
+  --color-tint-butter-soft: var(--tint-butter-soft);
+  --color-tint-lilac: var(--tint-lilac);
+
+  --shadow-press-tangerine: var(--shadow-press-tangerine);
+  --shadow-press-teal: var(--shadow-press-teal);
+  --shadow-press-cocoa: var(--shadow-press-cocoa);
+}
+
+@theme {
+  --font-display: "Gabarito", system-ui, -apple-system, sans-serif;
+  --font-body: "Karla", system-ui, -apple-system, sans-serif;
+
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.45;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.5;
+  --text-md: 1.0625rem;
+  --text-md--line-height: 1.35;
+  --text-lg: 1.3125rem;
+  --text-lg--line-height: 1.2;
+  --text-xl: 1.875rem;
+  --text-xl--line-height: 1.1;
+  --text-2xl: 3.25rem;
+  --text-2xl--line-height: 1.05;
+  --text-2xl--letter-spacing: -0.02em;
+  --text-num: 3.625rem;
+  --text-num--line-height: 0.9;
+
+  --font-weight-regular: var(--font-regular);
+  --font-weight-bold: var(--font-bold);
+  --font-weight-extrabold: var(--font-extrabold);
+  --font-weight-black: var(--font-black);
+
+  --spacing: 0.25rem;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.375rem;
+  --radius-full: 9999rem;
+
+  --container-content: 50rem;
+  --container-form: 40rem;
+  --container-page: 72.5rem;
+}

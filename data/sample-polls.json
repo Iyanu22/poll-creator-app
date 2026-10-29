@@ -1,0 +1,168 @@
+{
+  "creator": {
+    "name": "Morgan",
+    "avatar": { "seed": "Morgan", "tint": "cbe2d8" }
+  },
+  "polls": [
+    {
+      "id": "pizza-night",
+      "title": "Pizza night: what are we ordering?",
+      "type": "single",
+      "maxChoices": 1,
+      "suggestionsEnabled": true,
+      "status": "open",
+      "createdAt": "2026-09-17T08:45:00Z",
+      "closesAt": "2026-09-17T18:00:00Z",
+      "settledAt": null,
+      "shareUrl": "tiebreak.test/p/pizza-night",
+      "options": [
+        {
+          "id": "detroit",
+          "label": "Detroit-style from Emmy's",
+          "source": "suggestion",
+          "suggestionStatus": "approved",
+          "suggestedBy": { "name": "Priya", "avatar": { "seed": "Priya", "tint": "f8c9b9" } }
+        },
+        {
+          "id": "pepperoni",
+          "label": "Pepperoni from Slice House",
+          "source": "creator"
+        },
+        {
+          "id": "veggie",
+          "label": "Veggie supreme from Nino's",
+          "source": "suggestion",
+          "suggestionStatus": "approved",
+          "suggestedBy": { "name": "Jonah", "avatar": { "seed": "Jonah", "tint": "cbe2d8" } }
+        },
+        {
+          "id": "margherita",
+          "label": "Margherita from Lupa",
+          "source": "creator"
+        },
+        {
+          "id": "salads",
+          "label": "Just order salads",
+          "source": "suggestion",
+          "suggestionStatus": "pending",
+          "suggestedBy": { "name": "Sam", "avatar": { "seed": "Sam", "tint": "f6e0a4" } }
+        }
+      ],
+      "votes": [
+        { "optionId": "detroit", "voter": { "name": "Priya", "avatar": { "seed": "Priya", "tint": "f8c9b9" } }, "voterToken": "vt-priya-01", "castAt": "2026-09-17T09:12:00Z" },
+        { "optionId": "pepperoni", "voter": { "name": "Lena", "avatar": { "seed": "Lena", "tint": "e3d2f2" } }, "voterToken": "vt-lena-01", "castAt": "2026-09-17T09:31:00Z" },
+        { "optionId": "detroit", "voter": { "name": "Ada", "avatar": { "seed": "Ada", "tint": "f6e0a4" } }, "voterToken": "vt-ada-01", "castAt": "2026-09-17T09:40:00Z" },
+        { "optionId": "veggie", "voter": { "name": "Jonah", "avatar": { "seed": "Jonah", "tint": "cbe2d8" } }, "voterToken": "vt-jonah-01", "castAt": "2026-09-17T09:55:00Z" },
+        { "optionId": "detroit", "voter": { "name": "Kai", "avatar": { "seed": "Kai", "tint": "e3d2f2" } }, "voterToken": "vt-kai-01", "castAt": "2026-09-17T10:05:00Z" },
+        { "optionId": "pepperoni", "voter": { "name": "Marcus", "avatar": { "seed": "Marcus", "tint": "f6e0a4" } }, "voterToken": "vt-marcus-01", "castAt": "2026-09-17T10:47:00Z" },
+        { "optionId": "detroit", "voter": { "name": "Noor", "avatar": { "seed": "Noor", "tint": "f8c9b9" } }, "voterToken": "vt-noor-01", "castAt": "2026-09-17T11:22:00Z" },
+        { "optionId": "margherita", "voter": { "name": "Bo", "avatar": { "seed": "Bo", "tint": "f8c9b9" } }, "voterToken": "vt-bo-01", "castAt": "2026-09-17T11:48:00Z" },
+        { "optionId": "pepperoni", "voter": { "name": "Elif", "avatar": { "seed": "Elif", "tint": "cbe2d8" } }, "voterToken": "vt-elif-01", "castAt": "2026-09-17T12:15:00Z" },
+        { "optionId": "veggie", "voter": { "name": "Sam", "avatar": { "seed": "Sam", "tint": "f6e0a4" } }, "voterToken": "vt-sam-01", "castAt": "2026-09-17T13:02:00Z" },
+        { "optionId": "detroit", "voter": { "name": "Theo", "avatar": { "seed": "Theo", "tint": "cbe2d8" } }, "voterToken": "vt-theo-01", "castAt": "2026-09-17T14:58:00Z" }
+      ]
+    },
+    {
+      "id": "friday-film-club",
+      "title": "Friday film club: what are we watching?",
+      "type": "single",
+      "maxChoices": 1,
+      "suggestionsEnabled": true,
+      "status": "open",
+      "createdAt": "2026-09-15T18:20:00Z",
+      "closesAt": "2026-09-18T19:00:00Z",
+      "settledAt": null,
+      "shareUrl": "tiebreak.test/p/friday-film-club",
+      "options": [
+        { "id": "jaws", "label": "Jaws", "source": "creator" },
+        { "id": "heat", "label": "Heat", "source": "creator" },
+        { "id": "eeaao", "label": "Everything Everywhere All at Once", "source": "creator" }
+      ],
+      "votes": [
+        { "optionId": "jaws", "voter": { "name": "Priya", "avatar": { "seed": "Priya", "tint": "f8c9b9" } }, "voterToken": "vt-priya-02", "castAt": "2026-09-15T19:04:00Z" },
+        { "optionId": "heat", "voter": { "name": "Ada", "avatar": { "seed": "Ada", "tint": "f6e0a4" } }, "voterToken": "vt-ada-02", "castAt": "2026-09-15T19:47:00Z" },
+        { "optionId": "eeaao", "voter": { "name": "Jonah", "avatar": { "seed": "Jonah", "tint": "cbe2d8" } }, "voterToken": "vt-jonah-02", "castAt": "2026-09-15T21:10:00Z" },
+        { "optionId": "jaws", "voter": { "name": "Kai", "avatar": { "seed": "Kai", "tint": "e3d2f2" } }, "voterToken": "vt-kai-02", "castAt": "2026-09-16T08:15:00Z" },
+        { "optionId": "heat", "voter": { "name": "Noor", "avatar": { "seed": "Noor", "tint": "f8c9b9" } }, "voterToken": "vt-noor-02", "castAt": "2026-09-16T12:33:00Z" },
+        { "optionId": "eeaao", "voter": { "name": "Lena", "avatar": { "seed": "Lena", "tint": "e3d2f2" } }, "voterToken": "vt-lena-02", "castAt": "2026-09-16T17:58:00Z" },
+        { "optionId": "jaws", "voter": { "name": "Theo", "avatar": { "seed": "Theo", "tint": "cbe2d8" } }, "voterToken": "vt-theo-02", "castAt": "2026-09-17T07:41:00Z" }
+      ]
+    },
+    {
+      "id": "meal-out",
+      "title": "Meal out: which date works?",
+      "type": "single",
+      "maxChoices": 1,
+      "suggestionsEnabled": false,
+      "status": "settled",
+      "createdAt": "2026-09-10T10:00:00Z",
+      "closesAt": "2026-09-13T09:00:00Z",
+      "settledAt": "2026-09-12T17:30:00Z",
+      "shareUrl": "tiebreak.test/p/meal-out",
+      "options": [
+        { "id": "thu-24-sep", "label": "Thursday 24 September", "source": "creator" },
+        { "id": "fri-2-oct", "label": "Friday 2 October", "source": "creator" },
+        { "id": "sat-10-oct", "label": "Saturday 10 October", "source": "creator" }
+      ],
+      "votes": [
+        { "optionId": "thu-24-sep", "voter": { "name": "Priya", "avatar": { "seed": "Priya", "tint": "f8c9b9" } }, "voterToken": "vt-priya-03", "castAt": "2026-09-10T10:22:00Z" },
+        { "optionId": "fri-2-oct", "voter": { "name": "Kai", "avatar": { "seed": "Kai", "tint": "e3d2f2" } }, "voterToken": "vt-kai-03", "castAt": "2026-09-10T11:05:00Z" },
+        { "optionId": "thu-24-sep", "voter": { "name": "Jonah", "avatar": { "seed": "Jonah", "tint": "cbe2d8" } }, "voterToken": "vt-jonah-03", "castAt": "2026-09-10T13:40:00Z" },
+        { "optionId": "sat-10-oct", "voter": { "name": "Ada", "avatar": { "seed": "Ada", "tint": "f6e0a4" } }, "voterToken": "vt-ada-03", "castAt": "2026-09-10T15:12:00Z" },
+        { "optionId": "fri-2-oct", "voter": { "name": "Lena", "avatar": { "seed": "Lena", "tint": "e3d2f2" } }, "voterToken": "vt-lena-03", "castAt": "2026-09-11T09:03:00Z" },
+        { "optionId": "thu-24-sep", "voter": { "name": "Noor", "avatar": { "seed": "Noor", "tint": "f8c9b9" } }, "voterToken": "vt-noor-03", "castAt": "2026-09-11T12:57:00Z" },
+        { "optionId": "sat-10-oct", "voter": { "name": "Theo", "avatar": { "seed": "Theo", "tint": "cbe2d8" } }, "voterToken": "vt-theo-03", "castAt": "2026-09-11T19:26:00Z" },
+        { "optionId": "fri-2-oct", "voter": { "name": "Bo", "avatar": { "seed": "Bo", "tint": "f8c9b9" } }, "voterToken": "vt-bo-03", "castAt": "2026-09-12T08:44:00Z" },
+        { "optionId": "thu-24-sep", "voter": { "name": "Elif", "avatar": { "seed": "Elif", "tint": "cbe2d8" } }, "voterToken": "vt-elif-03", "castAt": "2026-09-12T14:19:00Z" }
+      ]
+    },
+    {
+      "id": "lake-weekend",
+      "title": "Lake weekend: which Airbnb?",
+      "type": "single",
+      "maxChoices": 1,
+      "suggestionsEnabled": true,
+      "status": "settled",
+      "createdAt": "2026-09-07T19:00:00Z",
+      "closesAt": "2026-09-08T20:00:00Z",
+      "settledAt": "2026-09-08T20:00:00Z",
+      "shareUrl": "tiebreak.test/p/lake-weekend",
+      "options": [
+        { "id": "a-frame-cabin", "label": "The A-frame cabin", "source": "creator" },
+        { "id": "lakeside-cottage", "label": "Lakeside cottage with the dock", "source": "creator" },
+        {
+          "id": "farmhouse",
+          "label": "The farmhouse up the hill",
+          "source": "suggestion",
+          "suggestionStatus": "approved",
+          "suggestedBy": { "name": "Jonah", "avatar": { "seed": "Jonah", "tint": "cbe2d8" } }
+        }
+      ],
+      "votes": [
+        { "optionId": "a-frame-cabin", "voter": { "name": "Priya", "avatar": { "seed": "Priya", "tint": "f8c9b9" } }, "voterToken": "vt-priya-04", "castAt": "2026-09-07T19:21:00Z" },
+        { "optionId": "lakeside-cottage", "voter": { "name": "Kai", "avatar": { "seed": "Kai", "tint": "e3d2f2" } }, "voterToken": "vt-kai-04", "castAt": "2026-09-07T20:02:00Z" },
+        { "optionId": "a-frame-cabin", "voter": { "name": "Ada", "avatar": { "seed": "Ada", "tint": "f6e0a4" } }, "voterToken": "vt-ada-04", "castAt": "2026-09-07T21:34:00Z" },
+        { "optionId": "farmhouse", "voter": { "name": "Jonah", "avatar": { "seed": "Jonah", "tint": "cbe2d8" } }, "voterToken": "vt-jonah-04", "castAt": "2026-09-08T08:16:00Z" },
+        { "optionId": "a-frame-cabin", "voter": { "name": "Sam", "avatar": { "seed": "Sam", "tint": "f6e0a4" } }, "voterToken": "vt-sam-04", "castAt": "2026-09-08T12:50:00Z" }
+      ]
+    },
+    {
+      "id": "birthday-brunch",
+      "title": "Birthday brunch: where are we booking?",
+      "type": "multi",
+      "maxChoices": 2,
+      "suggestionsEnabled": true,
+      "status": "open",
+      "createdAt": "2026-09-17T08:30:00Z",
+      "closesAt": "2026-09-19T10:00:00Z",
+      "settledAt": null,
+      "shareUrl": "tiebreak.test/p/birthday-brunch",
+      "options": [
+        { "id": "marlowe", "label": "The Marlowe", "source": "creator" },
+        { "id": "francas", "label": "Franca's on the corner", "source": "creator" },
+        { "id": "park-place", "label": "That new place by the park", "source": "creator" }
+      ],
+      "votes": []
+    }
+  ]
+}

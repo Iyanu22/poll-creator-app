@@ -1,0 +1,121 @@
+/* ============================================================
+   Tiebreak — Design Tokens
+   A cream tabletop, cocoa ink outlines, and three game-piece
+   colors with strict jobs: tangerine for the thing that's
+   winning, teal for the system keeping score, butter for
+   celebration. Depth comes from chunky borders and flat color,
+   not drop shadows. See guidance/brand-kit.md for the rationale
+   and the checked contrast pairs. Every color has one job.
+   ============================================================ */
+
+:root {
+  /* Surfaces — warm paper tones; nothing is pure white */
+  --color-cream: #FAF2E3;          /* app background */
+  --color-cream-deep: #F0E3C9;     /* sunken panels, active pills, hover fills, bar tracks */
+  --color-card: #FFFBF2;           /* cards, list panels, chips on cream */
+  --color-cream-bright: #FFF7EA;   /* text and icons on tangerine */
+
+  /* Ink — all text, borders, and icons; structure comes from outlines */
+  --color-cocoa: #38261A;
+  --color-cocoa-soft: #77614C;     /* secondary text, metadata */
+  --color-cocoa-faint: #A5937E;    /* disabled + decorative strokes ONLY — fails AA for text */
+
+  /* The accent — one tangerine moment per screen */
+  --color-tangerine: #E2542C;      /* leader card, icon-only accents */
+  --color-tangerine-deep: #B93E1E; /* primary CTA fill, unfilled tally ticks (small cream-bright
+                                      text fails AA on plain tangerine; this is the button fill) */
+
+  /* The system — status, vote bars, affirmative actions */
+  --color-teal: #1F7367;
+  --color-teal-deep: #14544B;      /* text on teal-soft, pressed teal */
+  --color-teal-soft: #CBE2D8;      /* "Voting open" pill, default avatar tint */
+
+  /* The celebration — ribbons, filled ticks, the winner. Never a neutral highlight */
+  --color-butter: #F3C64F;
+  --color-butter-deep: #D9A82E;    /* pressed/hover on butter, butter borders */
+
+  /* Scrim — cocoa tint that gets small bold cream-bright text to AA over tangerine */
+  --color-scrim-on-tangerine: rgba(56, 38, 26, 0.35);
+
+  /* No error color on purpose: errors speak in cocoa ink, plain words,
+     and an icon (see "Errors & destructive actions" in the brand kit).
+     Tangerine already means winning, so never use it for errors. */
+
+  /* Avatar background tints (DiceBear takes these hex values without the #) */
+  --tint-peach: #F8C9B9;
+  --tint-teal-soft: #CBE2D8;
+  --tint-butter-soft: #F6E0A4;
+  --tint-lilac: #E3D2F2;
+
+  /* Typography — Gabarito is the loud one (headings, scores, buttons);
+     Karla is the warm working UI. Both free on Google Fonts. */
+  --font-display: "Gabarito", system-ui, -apple-system, sans-serif;
+  --font-body: "Karla", system-ui, -apple-system, sans-serif;
+
+  --text-xs: 0.8125rem;    /* status pills, ribbon (uppercase, +0.06em tracking), timestamps */
+  --text-sm: 0.875rem;     /* metadata, secondary buttons, chips, vote counts */
+  --text-base: 0.9375rem;  /* body, primary buttons, nav links */
+  --text-md: 1.0625rem;    /* option names, card headlines */
+  --text-lg: 1.3125rem;    /* pack percentages, section headings */
+  --text-xl: 1.875rem;     /* leader card option name, modal titles */
+  --text-2xl: 3.25rem;     /* poll title (−0.02em tracking) */
+  --text-num: 3.625rem;    /* the hero percentage on the leader card */
+
+  --leading-num: 0.9;
+  --leading-display: 1.05;
+  --leading-tight: 1.1;
+  --leading-heading: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.45;
+  --leading-body: 1.5;
+
+  /* This direction runs bold: 700 is the workhorse UI weight.
+     Load Gabarito 500–900 and Karla 400–800. */
+  --font-regular: 400;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;       /* the hero numeral only */
+
+  /* Spacing (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-16: 4rem;
+
+  /* Radius — two shapes rule: the pill and the soft slab */
+  --radius-sm: 0.25rem;    /* tally ticks — sharpness reads as precision */
+  --radius-md: 0.75rem;    /* inputs, textareas */
+  --radius-lg: 1.375rem;   /* cards, panels, modals */
+  --radius-full: 9999rem;  /* buttons, pills, chips, avatars, bars, the dock */
+
+  /* Borders — depth from ink, not shadows. Don't thin these out. */
+  --border-card: 2.5px;    /* cards, avatars 34px+ */
+  --border-chip: 1.5px;    /* chips, small elements (up to 2px) */
+  --border-divider: 2px;   /* dashed cream-deep rules between rows in a card */
+
+  /* The one shadow in the system: pressed-plastic inset on filled buttons
+     (pair with a ~1.5px translateY on :active) */
+  --shadow-press-tangerine: inset 0 -2px 0 rgba(122, 34, 10, 0.35);
+  --shadow-press-teal: inset 0 -2px 0 rgba(10, 58, 50, 0.4);
+  --shadow-press-cocoa: inset 0 -2px 0 rgba(0, 0, 0, 0.35);
+
+  /* Focus — 3px teal ring, offset 2px, on everything interactive */
+  --focus-ring: 3px solid var(--color-teal);
+  --focus-ring-offset: 2px;
+
+  /* Layout — working screens are deliberately single-column */
+  --nav-height: 4.75rem;
+  --content-max-width: 50rem;  /* poll views, vote page */
+  --form-max-width: 40rem;     /* poll creation */
+  --page-max-width: 72.5rem;   /* nav container, dashboard, landing */
+}
+
+/* No dark theme here on purpose: light is the personality of this
+   direction. If you take on the dark-mode stretch, derive a lamplit
+   deep-cocoa palette with the same color roles and AA pairs (see
+   the brand kit) rather than inverting these values. */
