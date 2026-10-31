@@ -1,5 +1,8 @@
+import { Suspense } from "react";
+import { AccountStatus } from "./account-status";
+
 // Placeholder until the landing page is designed: proves tokens, fonts,
-// and the Tailwind mapping are wired up.
+// the Tailwind mapping, and sign-in are wired up.
 export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-content flex-1 flex-col justify-center gap-6 px-6 py-16">
@@ -15,6 +18,9 @@ export default function Home() {
           In the lead
         </span>
       </div>
+      <Suspense fallback={<p className="text-cocoa-soft">Checking sign-in…</p>}>
+        <AccountStatus />
+      </Suspense>
     </main>
   );
 }
