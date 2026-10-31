@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+.next/
+starter/
+data/
+spec/
+guidance/
+*.md

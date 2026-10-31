@@ -1,0 +1,50 @@
+/* Brand tokens + Tailwind theme mapping live in starter/ and stay untouched;
+   adaptations to the brand kit are layered here so the diff stays visible. */
+@import "../../starter/tailwind.css";
+
+/* next/font self-hosts Gabarito and Karla under generated family names,
+   exposed as --font-gabarito / --font-karla on <html>. Point the brand
+   font tokens at them (unlayered, so this wins over tokens.css). */
+:root {
+  --font-display: var(--font-gabarito), system-ui, -apple-system, sans-serif;
+  --font-body: var(--font-karla), system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-cream);
+    color: var(--color-cocoa);
+    font-family: var(--font-body);
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
