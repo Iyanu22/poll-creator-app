@@ -77,7 +77,10 @@ async function loadSuggestion(tx: Tx, pollId: string, optionId: string) {
     .from(options)
     .where(and(eq(options.id, optionId), eq(options.pollId, pollId)));
   if (!option) {
-    throw new RuleError("SUGGESTION_NOT_FOUND", "That suggestion doesn't exist.");
+    throw new RuleError(
+      "SUGGESTION_NOT_FOUND",
+      "That suggestion doesn't exist.",
+    );
   }
   return option;
 }
@@ -92,7 +95,11 @@ export async function settleExpired(
 ): Promise<void> {
   await db
     .update(polls)
-    .set({ status: "settled", settledAt: sql`${polls.closesAt}`, settledEarly: false })
+    .set({
+      status: "settled",
+      settledAt: sql`${polls.closesAt}`,
+      settledEarly: false,
+    })
     .where(
       and(
         "pollId" in where
@@ -156,7 +163,9 @@ export async function castBallot(
       .returning({ id: ballots.id });
     await tx
       .insert(votes)
-      .values(input.optionIds.map((optionId) => ({ ballotId: ballot.id, optionId })));
+      .values(
+        input.optionIds.map((optionId) => ({ ballotId: ballot.id, optionId })),
+      );
 
     return { ballotId: ballot.id, replayed: false };
   });
@@ -164,10 +173,17 @@ export async function castBallot(
 
 // ── Poll lifecycle (creator only) ────────────────────────────────────────
 
-export async function endVoting(pollId: string, creatorId: string, now = new Date()) {
+export async function endVoting(
+  pollId: string,
+  creatorId: string,
+  now = new Date(),
+) {
   await db.transaction(async (tx) => {
     const poll = await lockOwnPoll(tx, pollId, creatorId, now);
-    await tx.update(polls).set(planEndEarly(poll, now)).where(eq(polls.id, poll.id));
+    await tx
+      .update(polls)
+      .set(planEndEarly(poll, now))
+      .where(eq(polls.id, poll.id));
   });
 }
 

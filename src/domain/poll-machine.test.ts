@@ -126,7 +126,10 @@ describe("poll lifecycle", () => {
 
   it("refuses to reopen an open poll or without a future deadline", () => {
     expectRule(() => planReopen(openPoll(), minutes(60), NOW), "POLL_OPEN");
-    expectRule(() => planReopen(settledPoll(), NOW, NOW), "DEADLINE_NOT_FUTURE");
+    expectRule(
+      () => planReopen(settledPoll(), NOW, NOW),
+      "DEADLINE_NOT_FUTURE",
+    );
     expectRule(
       () => planReopen(settledPoll(), minutes(-1), NOW),
       "DEADLINE_NOT_FUTURE",
@@ -136,26 +139,46 @@ describe("poll lifecycle", () => {
 
 describe("casting", () => {
   it("accepts a single pick on the ballot, including approved suggestions", () => {
-    expect(() => assertCanCast(openPoll(), pizza, ["detroit"], NOW)).not.toThrow();
-    expect(() => assertCanCast(openPoll(), pizza, ["pepperoni"], NOW)).not.toThrow();
+    expect(() =>
+      assertCanCast(openPoll(), pizza, ["detroit"], NOW),
+    ).not.toThrow();
+    expect(() =>
+      assertCanCast(openPoll(), pizza, ["pepperoni"], NOW),
+    ).not.toThrow();
   });
 
   it("rejects votes on a settled poll, whatever the stored status says", () => {
-    expectRule(() => assertCanCast(settledPoll(), pizza, ["pepperoni"], NOW), "POLL_SETTLED");
     expectRule(
-      () => assertCanCast(openPoll({ closesAt: NOW }), pizza, ["pepperoni"], NOW),
+      () => assertCanCast(settledPoll(), pizza, ["pepperoni"], NOW),
+      "POLL_SETTLED",
+    );
+    expectRule(
+      () =>
+        assertCanCast(openPoll({ closesAt: NOW }), pizza, ["pepperoni"], NOW),
       "POLL_SETTLED",
     );
   });
 
   it("rejects pending and declined suggestions and unknown ids", () => {
-    expectRule(() => assertCanCast(openPoll(), pizza, ["salads"], NOW), "OPTION_NOT_ON_BALLOT");
-    expectRule(() => assertCanCast(openPoll(), pizza, ["pineapple"], NOW), "OPTION_NOT_ON_BALLOT");
-    expectRule(() => assertCanCast(openPoll(), pizza, ["nope"], NOW), "OPTION_NOT_ON_BALLOT");
+    expectRule(
+      () => assertCanCast(openPoll(), pizza, ["salads"], NOW),
+      "OPTION_NOT_ON_BALLOT",
+    );
+    expectRule(
+      () => assertCanCast(openPoll(), pizza, ["pineapple"], NOW),
+      "OPTION_NOT_ON_BALLOT",
+    );
+    expectRule(
+      () => assertCanCast(openPoll(), pizza, ["nope"], NOW),
+      "OPTION_NOT_ON_BALLOT",
+    );
   });
 
   it("enforces selection shape", () => {
-    expectRule(() => assertCanCast(openPoll(), pizza, [], NOW), "EMPTY_SELECTION");
+    expectRule(
+      () => assertCanCast(openPoll(), pizza, [], NOW),
+      "EMPTY_SELECTION",
+    );
     expectRule(
       () => assertCanCast(openPoll(), pizza, ["pepperoni", "margherita"], NOW),
       "TOO_MANY_CHOICES",
@@ -169,7 +192,13 @@ describe("casting", () => {
       "DUPLICATE_CHOICE",
     );
     expectRule(
-      () => assertCanCast(multi, pizza, ["pepperoni", "detroit", "margherita"], NOW),
+      () =>
+        assertCanCast(
+          multi,
+          pizza,
+          ["pepperoni", "detroit", "margherita"],
+          NOW,
+        ),
       "TOO_MANY_CHOICES",
     );
   });
@@ -187,24 +216,43 @@ describe("casting", () => {
 
 describe("suggestions", () => {
   it("accepts a new idea on an open poll with suggestions on", () => {
-    expect(() => assertCanSuggest(openPoll(), pizza, "Calzones", NOW)).not.toThrow();
+    expect(() =>
+      assertCanSuggest(openPoll(), pizza, "Calzones", NOW),
+    ).not.toThrow();
   });
 
   it("rejects when settled or disabled", () => {
-    expectRule(() => assertCanSuggest(settledPoll(), pizza, "Calzones", NOW), "POLL_SETTLED");
     expectRule(
-      () => assertCanSuggest(openPoll({ suggestionsEnabled: false }), pizza, "Calzones", NOW),
+      () => assertCanSuggest(settledPoll(), pizza, "Calzones", NOW),
+      "POLL_SETTLED",
+    );
+    expectRule(
+      () =>
+        assertCanSuggest(
+          openPoll({ suggestionsEnabled: false }),
+          pizza,
+          "Calzones",
+          NOW,
+        ),
       "SUGGESTIONS_DISABLED",
     );
   });
 
   it("rejects duplicates of ballot and pending options, ignoring case and spacing", () => {
-    expectRule(() => assertCanSuggest(openPoll(), pizza, "  PEPPERONI ", NOW), "DUPLICATE_LABEL");
-    expectRule(() => assertCanSuggest(openPoll(), pizza, "salads", NOW), "DUPLICATE_LABEL");
+    expectRule(
+      () => assertCanSuggest(openPoll(), pizza, "  PEPPERONI ", NOW),
+      "DUPLICATE_LABEL",
+    );
+    expectRule(
+      () => assertCanSuggest(openPoll(), pizza, "salads", NOW),
+      "DUPLICATE_LABEL",
+    );
   });
 
   it("lets a declined idea be suggested again", () => {
-    expect(() => assertCanSuggest(openPoll(), pizza, "Pineapple", NOW)).not.toThrow();
+    expect(() =>
+      assertCanSuggest(openPoll(), pizza, "Pineapple", NOW),
+    ).not.toThrow();
   });
 });
 
@@ -220,11 +268,18 @@ describe("moderation", () => {
 
   it("never approves an already-decided suggestion or a creator option", () => {
     expectRule(
-      () => planApprove(openPoll(), pizza, suggestion("pineapple", "declined"), NOW),
+      () =>
+        planApprove(
+          openPoll(),
+          pizza,
+          suggestion("pineapple", "declined"),
+          NOW,
+        ),
       "SUGGESTION_NOT_PENDING",
     );
     expectRule(
-      () => planApprove(openPoll(), pizza, suggestion("detroit", "approved"), NOW),
+      () =>
+        planApprove(openPoll(), pizza, suggestion("detroit", "approved"), NOW),
       "SUGGESTION_NOT_PENDING",
     );
     expectRule(
@@ -234,14 +289,28 @@ describe("moderation", () => {
   });
 
   it("won't approve onto a settled poll or a full ballot", () => {
-    expectRule(() => planApprove(settledPoll(), pizza, pending, NOW), "POLL_SETTLED");
-    const full = Array.from({ length: MAX_OPTIONS }, (_, i) => creatorOption(`o${i}`));
-    expectRule(() => planApprove(openPoll(), [...full, pending], pending, NOW), "BALLOT_FULL");
+    expectRule(
+      () => planApprove(settledPoll(), pizza, pending, NOW),
+      "POLL_SETTLED",
+    );
+    const full = Array.from({ length: MAX_OPTIONS }, (_, i) =>
+      creatorOption(`o${i}`),
+    );
+    expectRule(
+      () => planApprove(openPoll(), [...full, pending], pending, NOW),
+      "BALLOT_FULL",
+    );
   });
 
   it("declines pending suggestions, even after the poll settles", () => {
-    expect(planDecline(pending, NOW)).toEqual({ suggestionStatus: "declined", decidedAt: NOW });
-    expectRule(() => planDecline(suggestion("detroit", "approved"), NOW), "SUGGESTION_NOT_PENDING");
+    expect(planDecline(pending, NOW)).toEqual({
+      suggestionStatus: "declined",
+      decidedAt: NOW,
+    });
+    expectRule(
+      () => planDecline(suggestion("detroit", "approved"), NOW),
+      "SUGGESTION_NOT_PENDING",
+    );
   });
 
   it("undoes a decline inside the window, not after", () => {
@@ -251,7 +320,10 @@ describe("moderation", () => {
       suggestionStatus: "pending",
       decidedAt: null,
     });
-    expectRule(() => planUndoDecline(declined, at(DECLINE_UNDO_WINDOW_MS + 1)), "UNDO_EXPIRED");
+    expectRule(
+      () => planUndoDecline(declined, at(DECLINE_UNDO_WINDOW_MS + 1)),
+      "UNDO_EXPIRED",
+    );
   });
 
   it("only undoes declines", () => {

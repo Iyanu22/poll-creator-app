@@ -151,7 +151,10 @@ export function assertCanCast(
     throw new RuleError("EMPTY_SELECTION", "Pick an option to vote for.");
   }
   if (new Set(selection).size !== selection.length) {
-    throw new RuleError("DUPLICATE_CHOICE", "Each option can only be picked once.");
+    throw new RuleError(
+      "DUPLICATE_CHOICE",
+      "Each option can only be picked once.",
+    );
   }
   if (selection.length > poll.maxChoices) {
     throw new RuleError(
@@ -219,7 +222,10 @@ export function assertCanSuggest(
 
 function assertPending(option: OptionState) {
   if (option.source !== "suggestion") {
-    throw new RuleError("SUGGESTION_NOT_FOUND", "That suggestion doesn't exist.");
+    throw new RuleError(
+      "SUGGESTION_NOT_FOUND",
+      "That suggestion doesn't exist.",
+    );
   }
   if (option.suggestionStatus !== "pending") {
     throw new RuleError(
@@ -248,7 +254,10 @@ export function planApprove(
 }
 
 /** Allowed on settled polls too: tidying the queue is always fine. */
-export function planDecline(suggestion: OptionState, now: Date): SuggestionPatch {
+export function planDecline(
+  suggestion: OptionState,
+  now: Date,
+): SuggestionPatch {
   assertPending(suggestion);
   return { suggestionStatus: "declined", decidedAt: now };
 }

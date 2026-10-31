@@ -28,7 +28,10 @@ import { users } from "./auth";
 export const pollType = pgEnum("poll_type", POLL_TYPES);
 export const pollStatus = pgEnum("poll_status", POLL_STATUSES);
 export const optionSource = pgEnum("option_source", OPTION_SOURCES);
-export const suggestionStatus = pgEnum("suggestion_status", SUGGESTION_STATUSES);
+export const suggestionStatus = pgEnum(
+  "suggestion_status",
+  SUGGESTION_STATUSES,
+);
 
 // The poll id is the share slug and the access control for public pages
 // (unguessable link = permission to vote). 12 chars of [a-z0-9] ≈ 62 bits:
@@ -64,7 +67,10 @@ export const polls = pgTable(
   },
   (t) => [
     index().on(t.creatorId, t.status, t.closesAt),
-    check("polls_title_length", sql`char_length(${t.title}) between 1 and ${sql.raw(String(TITLE_MAX))}`),
+    check(
+      "polls_title_length",
+      sql`char_length(${t.title}) between 1 and ${sql.raw(String(TITLE_MAX))}`,
+    ),
     check(
       "polls_max_choices",
       sql`(${t.type} = 'single' and ${t.maxChoices} = 1) or (${t.type} = 'multi' and ${t.maxChoices} >= 2)`,
@@ -155,7 +161,10 @@ export const votes = pgTable(
       .notNull()
       .references(() => options.id, { onDelete: "cascade" }),
   },
-  (t) => [primaryKey({ columns: [t.ballotId, t.optionId] }), index().on(t.optionId)],
+  (t) => [
+    primaryKey({ columns: [t.ballotId, t.optionId] }),
+    index().on(t.optionId),
+  ],
 );
 
 export type Poll = typeof polls.$inferSelect;
