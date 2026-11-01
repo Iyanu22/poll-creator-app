@@ -10,6 +10,7 @@ import {
   reopenVoting,
   undoDeclineSuggestion,
 } from "@/server/poll-service";
+import { notifyPollChanged } from "@/server/notify";
 import { getCurrentUser } from "@/server/session";
 
 // Creator actions on one poll. Arguments come from the browser, so they're
@@ -22,6 +23,7 @@ const pollIdSchema = z.string().min(1).max(64);
 const optionIdSchema = z.uuid();
 
 async function asCreator(
+  pollId: string,
   run: (creatorId: string) => Promise<void>,
 ): Promise<ActionResult> {
   const user = await getCurrentUser();
@@ -36,6 +38,7 @@ async function asCreator(
     throw error;
   }
   refresh();
+  notifyPollChanged(pollId);
   return { ok: true };
 }
 
@@ -47,14 +50,14 @@ const invalid: ActionResult = {
 export async function endVotingAction(pollId: string) {
   const id = pollIdSchema.safeParse(pollId);
   if (!id.success) return invalid;
-  return asCreator((creatorId) => endVoting(id.data, creatorId));
+  return asCreator(id.data, (creatorId) => endVoting(id.data, creatorId));
 }
 
 export async function reopenVotingAction(pollId: string, closesAt: string) {
   const id = pollIdSchema.safeParse(pollId);
   const deadline = z.iso.datetime().safeParse(closesAt);
   if (!id.success || !deadline.success) return invalid;
-  return asCreator((creatorId) =>
+  return asCreator(id.data, (creatorId) =>
     reopenVoting(id.data, creatorId, new Date(deadline.data)),
   );
 }
@@ -66,7 +69,9 @@ function suggestionAction(
     const id = pollIdSchema.safeParse(pollId);
     const option = optionIdSchema.safeParse(optionId);
     if (!id.success || !option.success) return invalid;
-    return asCreator((creatorId) => apply(id.data, option.data, creatorId));
+    return asCreator(id.data, (creatorId) =>
+      apply(id.data, option.data, creatorId),
+    );
   };
 }
 

@@ -11,6 +11,7 @@ import {
   VOTER_NAME_MAX,
 } from "@/domain/rules";
 import { castBallot, suggestOption } from "@/server/poll-service";
+import { notifyPollChanged } from "@/server/notify";
 import { ensureVoterToken } from "@/server/voter-token";
 
 // Voter actions on the public vote page. No account: the voter token cookie
@@ -65,6 +66,7 @@ export async function castVoteAction(
     return { ok: false, message: error.message };
   }
   refresh();
+  notifyPollChanged(id.data);
   return { ok: true };
 }
 
@@ -83,6 +85,8 @@ export async function suggestAction(
     if (!(error instanceof RuleError)) throw error;
     return { ok: false, message: error.message };
   }
-  // Nothing to refresh: pending suggestions aren't on the public ballot
+  // Nothing to refresh here: pending suggestions aren't on the public
+  // ballot. The creator's page hears about it, though.
+  notifyPollChanged(id.data);
   return { ok: true };
 }

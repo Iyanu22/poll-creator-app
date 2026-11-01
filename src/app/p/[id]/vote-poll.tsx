@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { Avatar, faceUri } from "@/components/avatar";
+import { LivePoll } from "@/components/live-poll";
 import { Standings, StatusChips, avatarProps } from "@/components/poll-results";
-import { buildResults, type Results } from "@/domain/results";
+import { announceStanding, buildResults, type Results } from "@/domain/results";
 import { VOTER_FACES } from "@/domain/rules";
 import { getPublicPoll, type PublicPoll } from "@/server/public-poll";
 import type { BallotOption } from "@/server/poll-view";
@@ -70,6 +71,20 @@ export async function VotePoll({
           }))}
         />
       )}
+
+      {/* Keeps every state current: the race once it's visible, quietly
+          otherwise (a suggestion joins the ballot, the deadline passes) */}
+      <LivePoll
+        pollId={poll.id}
+        open={poll.status === "open"}
+        closesAt={poll.closesAt}
+        showIndicator={poll.canSeeCounts}
+        summary={
+          poll.canSeeCounts
+            ? announceStanding({ ...poll, standing: results.standing })
+            : null
+        }
+      />
     </>
   );
 }

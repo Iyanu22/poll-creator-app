@@ -1,5 +1,10 @@
-import type { PollType } from "./rules";
-import { computeStanding, type Standing, type Tally } from "./standings";
+import type { PollStatus, PollType } from "./rules";
+import {
+  computeStanding,
+  describeStanding,
+  type Standing,
+  type Tally,
+} from "./standings";
 
 // The numbers behind the results screen. Everything here follows the brand
 // kit's data-viz rules: percentages always ride with counts, trailing bars
@@ -156,4 +161,28 @@ export function describePackTies(pack: ResultRow[]): string[] {
       ([votes, labels]) =>
         `${listNames(labels, labels.length)} are tied at ${plural(votes, "vote")} each.`,
     );
+}
+
+/**
+ * The race as one sentence for the live region, e.g. "12 votes in. Detroit
+ * leads, 5 of 12 votes, ahead by 2." Spoken, so no middots.
+ */
+export function announceStanding({
+  standing,
+  voters,
+  type,
+  status,
+}: {
+  standing: Standing;
+  voters: number;
+  type: PollType;
+  status: PollStatus;
+}): string {
+  const line = describeStanding({ standing, voters, type, status }).replaceAll(
+    " · ",
+    ", ",
+  );
+  if (status === "settled") return `Voting has closed. ${line}.`;
+  if (standing.kind === "no-votes") return `${line}.`;
+  return `${describeRace(standing, voters).count}. ${line}.`;
 }

@@ -2,9 +2,14 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Avatar } from "@/components/avatar";
 import { CopyLinkButton } from "@/components/copy-link-button";
+import { LivePoll } from "@/components/live-poll";
 import { LocalAgo } from "@/components/local-day";
 import { Standings, StatusChips, avatarProps } from "@/components/poll-results";
-import { buildResults, resultSummary } from "@/domain/results";
+import {
+  announceStanding,
+  buildResults,
+  resultSummary,
+} from "@/domain/results";
 import {
   getCreatorPoll,
   type BallotOption,
@@ -53,6 +58,14 @@ export async function CreatorPoll({
             />
           </>
         }
+      />
+
+      <LivePoll
+        pollId={poll.id}
+        open={open}
+        closesAt={poll.closesAt}
+        showIndicator
+        summary={announceStanding({ ...poll, standing: results.standing })}
       />
 
       {/* Moderation is for open polls: approving onto a decided ballot

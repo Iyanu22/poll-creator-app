@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildResults,
+  announceStanding,
   describeBackers,
   describePackTies,
   describeRace,
@@ -145,5 +146,42 @@ describe("describePackTies", () => {
 
   it("says nothing when the pack has no ties", () => {
     expect(describePackTies(buildResults(pizza, 11).pack)).toEqual([]);
+  });
+});
+
+describe("announceStanding", () => {
+  it("speaks the race without symbols", () => {
+    const { standing } = buildResults(pizza, 11);
+    expect(
+      announceStanding({
+        standing,
+        voters: 11,
+        type: "single",
+        status: "open",
+      }),
+    ).toBe("11 votes in. Detroit leads, 5 of 11 votes, ahead by 2.");
+  });
+
+  it("says when voting has closed", () => {
+    const { standing } = buildResults(pizza, 11);
+    expect(
+      announceStanding({
+        standing,
+        voters: 11,
+        type: "single",
+        status: "settled",
+      }),
+    ).toBe("Voting has closed. Detroit won, 5 of 11 votes.");
+  });
+
+  it("handles a poll with no votes", () => {
+    expect(
+      announceStanding({
+        standing: { kind: "no-votes" },
+        voters: 0,
+        type: "single",
+        status: "open",
+      }),
+    ).toBe("No votes yet.");
   });
 });
