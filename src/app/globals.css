@@ -48,3 +48,19 @@
     }
   }
 }
+
+/* The voter's confirmation lands like a stamp: once, right after casting.
+   Reduced motion gets the same heading, just without the press. */
+@keyframes stamp-in {
+  0% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.97);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}

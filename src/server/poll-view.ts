@@ -109,7 +109,9 @@ export type CreatorPoll = NonNullable<
 >;
 
 /** Voters per option id, in the order they voted. */
-async function loadBackers(pollId: string): Promise<Record<string, Person[]>> {
+export async function loadBackers(
+  pollId: string,
+): Promise<Record<string, Person[]>> {
   const rows = await db
     .select({
       optionId: votes.optionId,

@@ -22,6 +22,30 @@ export const GUEST_SANDBOX_TTL_MS = 24 * 60 * 60 * 1000;
 export const AVATAR_TINTS = ["f8c9b9", "cbe2d8", "f6e0a4", "e3d2f2"] as const;
 export type AvatarTint = (typeof AVATAR_TINTS)[number];
 
+/** Names for the tints, for screen readers and labels. */
+export const AVATAR_TINT_NAMES: Record<AvatarTint, string> = {
+  f8c9b9: "Peach",
+  cbe2d8: "Mint",
+  f6e0a4: "Butter",
+  e3d2f2: "Lilac",
+};
+
+/**
+ * The voter's preset faces: DiceBear seeds picked for variety. Voters choose
+ * one, so the server only accepts these for new ballots and suggestions
+ * (sample data keeps its own seeds).
+ */
+export const VOTER_FACES = [
+  "Mila",
+  "Otis",
+  "Zara",
+  "Felix",
+  "Nia",
+  "Rowan",
+  "Iris",
+  "Sol",
+] as const;
+
 export const POLL_TYPES = ["single", "multi"] as const;
 export const POLL_STATUSES = ["open", "settled"] as const;
 export const OPTION_SOURCES = ["creator", "suggestion"] as const;
