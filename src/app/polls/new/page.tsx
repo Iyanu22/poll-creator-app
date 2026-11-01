@@ -9,7 +9,11 @@ export const metadata: Metadata = { title: "New poll" };
 
 export default function NewPollPage() {
   return (
-    <main className="mx-auto flex w-full max-w-form flex-1 flex-col gap-8 px-6 pt-4 pb-16">
+    <main
+      id="main"
+      tabIndex={-1}
+      className="mx-auto flex w-full max-w-form flex-1 flex-col gap-8 px-6 pt-4 pb-16 outline-none"
+    >
       <header className="flex flex-col gap-4">
         <Link href="/polls" className="self-start text-sm font-bold underline">
           <span aria-hidden="true">← </span>My polls

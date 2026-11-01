@@ -27,7 +27,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${gabarito.variable} ${karla.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {/* First stop for keyboard users: past any header, to the content */}
+        <a
+          href="#main"
+          className="sr-only z-50 rounded-full bg-cocoa px-5 py-3 font-bold text-cream-bright focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        >
+          Skip to content
+        </a>
+        {children}
+      </body>
     </html>
   );
 }

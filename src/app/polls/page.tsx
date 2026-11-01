@@ -6,7 +6,11 @@ export const metadata: Metadata = { title: "My polls" };
 
 export default function PollsPage() {
   return (
-    <main className="mx-auto flex w-full max-w-content flex-1 flex-col gap-8 px-6 py-10">
+    <main
+      id="main"
+      tabIndex={-1}
+      className="mx-auto flex w-full max-w-content flex-1 flex-col gap-8 px-6 py-10 outline-none"
+    >
       <h1 className="font-display text-xl font-extrabold">My polls</h1>
       <Suspense fallback={<DashboardSkeleton />}>
         <Dashboard />

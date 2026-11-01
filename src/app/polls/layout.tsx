@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { Suspense } from "react";
 import { AccountStatus } from "../account-status";
 
@@ -9,9 +10,7 @@ export default function PollsLayout({ children }: LayoutProps<"/polls">) {
     <>
       <header className="mx-auto flex w-full max-w-page flex-wrap items-center justify-between gap-4 px-6 py-5">
         <nav aria-label="Main" className="flex items-center gap-6">
-          <Link href="/polls" className="font-display text-lg font-extrabold">
-            tiebreak
-          </Link>
+          <Logo href="/polls" />
         </nav>
         <div className="flex flex-wrap items-center gap-4">
           <Link

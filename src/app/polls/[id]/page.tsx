@@ -1,12 +1,31 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { POLL_NOT_FOUND_TITLE, getPollMeta } from "@/server/poll-meta";
+import { getCurrentUser } from "@/server/session";
 import { CreatorPoll } from "./creator-poll";
 
-export const metadata: Metadata = { title: "Your poll" };
+// "Pizza night · Live results · Tiebreak". Only the creator sees the title:
+// to anyone else this poll doesn't exist, in the tab as on the page.
+export async function generateMetadata({
+  params,
+}: PageProps<"/polls/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const [meta, user] = await Promise.all([getPollMeta(id), getCurrentUser()]);
+  if (!meta || meta.creatorId !== user?.id) {
+    return { title: POLL_NOT_FOUND_TITLE };
+  }
+  return {
+    title: `${meta.title} · ${meta.settled ? "Result" : "Live results"}`,
+  };
+}
 
 export default function PollPage({ params }: PageProps<"/polls/[id]">) {
   return (
-    <main className="mx-auto flex w-full max-w-content flex-1 flex-col gap-8 px-6 pt-4 pb-16">
+    <main
+      id="main"
+      tabIndex={-1}
+      className="mx-auto flex w-full max-w-content flex-1 flex-col gap-8 px-6 pt-4 pb-16 outline-none"
+    >
       <Suspense fallback={<PollSkeleton />}>
         <CreatorPoll params={params} />
       </Suspense>

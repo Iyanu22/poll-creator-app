@@ -1,18 +1,29 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { Suspense } from "react";
+import { POLL_NOT_FOUND_TITLE, getPollMeta } from "@/server/poll-meta";
 import { VotePoll } from "./vote-poll";
 
-export const metadata: Metadata = { title: "Vote" };
+// Public by link, so the title is too: "Pizza night · Vote · Tiebreak"
+export async function generateMetadata({
+  params,
+}: PageProps<"/p/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const meta = await getPollMeta(id);
+  if (!meta) return { title: POLL_NOT_FOUND_TITLE };
+  return { title: `${meta.title} · ${meta.settled ? "Result" : "Vote"}` };
+}
 
 // The public vote page: no account, no nav, one obvious action. Most
 // voters see only this screen, on a phone, mid-conversation.
 export default function VotePage({ params }: PageProps<"/p/[id]">) {
   return (
-    <main className="mx-auto flex w-full max-w-content flex-1 flex-col gap-8 px-6 pt-5">
-      <Link href="/" className="self-start font-display text-md font-extrabold">
-        tiebreak
-      </Link>
+    <main
+      id="main"
+      tabIndex={-1}
+      className="mx-auto flex w-full max-w-content flex-1 flex-col gap-8 px-6 pt-5 outline-none"
+    >
+      <Logo />
       <Suspense fallback={<VoteSkeleton />}>
         <VotePoll params={params} />
       </Suspense>

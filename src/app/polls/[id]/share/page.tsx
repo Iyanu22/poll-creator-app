@@ -4,17 +4,31 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
 import { avatarProps } from "@/components/poll-results";
+import { POLL_NOT_FOUND_TITLE, getPollMeta } from "@/server/poll-meta";
 import { getCreatorPoll } from "@/server/poll-view";
 import { getCurrentUser } from "@/server/session";
 import { ShareCard } from "./share-card";
 
-export const metadata: Metadata = { title: "Share your poll" };
+export async function generateMetadata({
+  params,
+}: PageProps<"/polls/[id]/share">): Promise<Metadata> {
+  const { id } = await params;
+  const [meta, user] = await Promise.all([getPollMeta(id), getCurrentUser()]);
+  if (!meta || meta.creatorId !== user?.id) {
+    return { title: POLL_NOT_FOUND_TITLE };
+  }
+  return { title: `${meta.title} · Share` };
+}
 
 // The moment the product leaves the app and enters the chat. Everything here
 // points at one thing: getting the link into the group.
 export default function SharePage({ params }: PageProps<"/polls/[id]/share">) {
   return (
-    <main className="mx-auto flex w-full max-w-form flex-1 flex-col gap-8 px-6 pt-8 pb-16">
+    <main
+      id="main"
+      tabIndex={-1}
+      className="mx-auto flex w-full max-w-form flex-1 flex-col gap-8 px-6 pt-8 pb-16 outline-none"
+    >
       <Suspense fallback={<ShareSkeleton />}>
         <ShareStep params={params} />
       </Suspense>
