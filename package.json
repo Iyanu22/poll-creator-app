@@ -17,6 +17,8 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.4.2",
+    "@dicebear/core": "^9.4.3",
     "@neondatabase/serverless": "^1.2.0",
     "better-auth": "^1.7.14",
     "drizzle-orm": "^0.45.4",

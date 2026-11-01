@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeDay } from "./format-time";
+import { describeAgo, describeDay } from "./format-time";
 
 const opts = { locale: "en-US", timeZone: "Europe/London" };
 // Sunday 1 Nov 2026, 15:00 in London (GMT)
@@ -40,5 +40,23 @@ describe("describeDay", () => {
     expect(
       describeDay(late, now, { locale: "en-US", timeZone: "Africa/Lagos" }),
     ).toBe("tomorrow at 12:30 AM");
+  });
+});
+
+describe("describeAgo", () => {
+  const ago = (ms: number) => new Date(now.getTime() - ms);
+  const MIN = 60_000;
+
+  it("goes from just now to minutes to hours", () => {
+    expect(describeAgo(ago(20_000), now, opts)).toBe("just now");
+    expect(describeAgo(ago(2 * MIN), now, opts)).toBe("2 min ago");
+    expect(describeAgo(ago(60 * MIN), now, opts)).toBe("1 hour ago");
+    expect(describeAgo(ago(5 * 60 * MIN), now, opts)).toBe("5 hours ago");
+  });
+
+  it("switches to a day once it's older than half a day", () => {
+    expect(describeAgo(new Date("2026-10-31T09:30:00Z"), now, opts)).toBe(
+      "yesterday at 9:30 AM",
+    );
   });
 });
