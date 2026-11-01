@@ -101,7 +101,11 @@ export function PollControls({
           {resultText ? (
             <>
               <CopyLinkButton path={path} className={secondary} />
-              <CopyResultButton text={resultText} className={primary} />
+              <CopyResultButton
+                text={resultText}
+                path={path}
+                className={primary}
+              />
             </>
           ) : (
             <CopyLinkButton path={path} className={primary} />

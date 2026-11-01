@@ -74,14 +74,17 @@ export function CopyLinkButton({
 /** Copies the outcome as text for the group chat. */
 export function CopyResultButton({
   text,
+  path,
   className,
 }: {
   text: string;
+  /** The poll, linked on the last line so the paste stands on its own. */
+  path: string;
   className?: string;
 }) {
   return (
     <CopyButton
-      getText={() => text}
+      getText={() => `${text}\n${new URL(path, window.location.origin).href}`}
       label="Copy result"
       announcement="Result copied"
       className={className}

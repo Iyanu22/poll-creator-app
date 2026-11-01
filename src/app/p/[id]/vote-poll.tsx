@@ -161,7 +161,16 @@ function ClosedView({
           </p>
         ) : null}
       </section>
-      <Standings poll={poll} results={results} headingId={STANDINGS_ID} />
+      <Standings
+        poll={poll}
+        results={results}
+        headingId={STANDINGS_ID}
+        tieSlot={
+          <p className="self-start rounded-md bg-scrim-on-tangerine px-3 py-1.5 text-sm font-bold">
+            {poll.creatorFirstName} will break the tie.
+          </p>
+        }
+      />
     </>
   );
 }

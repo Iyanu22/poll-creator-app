@@ -1,4 +1,5 @@
 import "server-only";
+import { connection } from "next/server";
 import { count, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { ballots, options, polls, votes } from "@/db/schema";
@@ -29,8 +30,12 @@ export interface Dashboard {
 
 export async function getDashboard(
   creatorId: string,
-  now = new Date(),
+  /** Tests pass a fixed time; otherwise the request time. */
+  nowOverride?: Date,
 ): Promise<Dashboard> {
+  // Reads the clock (lazy settling): per request, never prerendered
+  await connection();
+  const now = nowOverride ?? new Date();
   // Record deadlines that passed while nobody was looking
   await settleExpired({ creatorId }, now);
 

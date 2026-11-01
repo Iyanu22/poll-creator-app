@@ -1,4 +1,5 @@
 import "server-only";
+import { connection } from "next/server";
 import { and, asc, count, eq, max } from "drizzle-orm";
 import { db } from "@/db";
 import { ballots, options, polls, votes } from "@/db/schema";
@@ -26,8 +27,12 @@ export interface PendingSuggestion {
 export async function getCreatorPoll(
   pollId: string,
   creatorId: string,
-  now = new Date(),
+  /** Tests pass a fixed time; otherwise the request time. */
+  nowOverride?: Date,
 ) {
+  // Reads the clock (lazy settling): per request, never prerendered
+  await connection();
+  const now = nowOverride ?? new Date();
   await settleExpired({ pollId }, now);
 
   const [poll] = await db

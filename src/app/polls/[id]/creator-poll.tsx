@@ -18,6 +18,7 @@ import {
 import { getCurrentUser } from "@/server/session";
 import { PendingSuggestions } from "./pending-suggestions";
 import { PollControls } from "./poll-controls";
+import { TiebreakerButton } from "./tiebreaker-button";
 
 const TITLE_ID = "poll-title";
 const STANDINGS_ID = "standings-heading";
@@ -46,6 +47,7 @@ export async function CreatorPoll({
         poll={poll}
         results={results}
         headingId={STANDINGS_ID}
+        tieSlot={<TiebreakerButton pollId={poll.id} />}
         emptyState={
           <>
             <p className="text-cocoa-soft">

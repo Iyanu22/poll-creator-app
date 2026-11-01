@@ -1,4 +1,5 @@
 import "server-only";
+import { connection } from "next/server";
 import { asc, count, eq, and } from "drizzle-orm";
 import { db } from "@/db";
 import { ballots, options, polls, users, votes } from "@/db/schema";
@@ -21,8 +22,12 @@ export interface MyBallot extends Person {
 export async function getPublicPoll(
   pollId: string,
   voterToken: string | null,
-  now = new Date(),
+  /** Tests pass a fixed time; otherwise the request time. */
+  nowOverride?: Date,
 ) {
+  // Reads the clock (lazy settling): per request, never prerendered
+  await connection();
+  const now = nowOverride ?? new Date();
   await settleExpired({ pollId }, now);
 
   const [poll] = await db
