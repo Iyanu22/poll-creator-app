@@ -27,7 +27,7 @@ export function SignInButtons() {
       setFailed(true);
       return;
     }
-    router.push("/");
+    router.push("/polls");
     router.refresh();
   }
 
@@ -38,7 +38,7 @@ export function SignInButtons() {
     // come back here. Provider-side errors land on errorCallbackURL.
     const { error } = await authClient.signIn.social({
       provider,
-      callbackURL: "/",
+      callbackURL: "/polls",
       errorCallbackURL: "/sign-in",
     });
     if (error) {
