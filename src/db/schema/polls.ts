@@ -36,7 +36,10 @@ export const suggestionStatus = pgEnum(
 // The poll id is the share slug and the access control for public pages
 // (unguessable link = permission to vote). 12 chars of [a-z0-9] ≈ 62 bits:
 // short enough to paste into a chat, far too many to enumerate.
-const pollSlug = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 12);
+export const pollSlug = customAlphabet(
+  "0123456789abcdefghijklmnopqrstuvwxyz",
+  12,
+);
 
 const tintList = sql.raw(AVATAR_TINTS.map((t) => `'${t}'`).join(", "));
 

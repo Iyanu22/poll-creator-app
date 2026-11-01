@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
@@ -11,8 +12,24 @@ const providers = [
 type ProviderId = (typeof providers)[number]["id"];
 
 export function SignInButtons() {
-  const [pending, setPending] = useState<ProviderId | null>(null);
+  const router = useRouter();
+  const [pending, setPending] = useState<ProviderId | "guest" | null>(null);
   const [failed, setFailed] = useState(false);
+
+  async function tryAsGuest() {
+    setPending("guest");
+    setFailed(false);
+    // Creates the anonymous user; the server seeds their sample polls
+    // before this resolves.
+    const { error } = await authClient.signIn.anonymous();
+    if (error) {
+      setPending(null);
+      setFailed(true);
+      return;
+    }
+    router.push("/");
+    router.refresh();
+  }
 
   async function signIn(provider: ProviderId) {
     setPending(provider);
@@ -44,6 +61,15 @@ export function SignInButtons() {
           {pending === id ? "Redirecting…" : label}
         </button>
       ))}
+      <button
+        type="button"
+        onClick={tryAsGuest}
+        disabled={pending !== null}
+        aria-busy={pending === "guest"}
+        className="rounded-full px-5 py-3 font-display text-base font-bold underline disabled:opacity-60"
+      >
+        {pending === "guest" ? "Setting up your sample polls…" : "Try as guest"}
+      </button>
       <p role="alert" className="text-sm text-cocoa-soft">
         {failed ? "That didn't go through. Try again." : null}
       </p>

@@ -17,8 +17,13 @@ export async function AccountStatus() {
   return (
     <div className="flex flex-wrap items-center gap-3">
       <p>
-        Signed in as <strong>{user.isGuest ? "Guest" : user.name}</strong>
+        Signed in as <strong>{user.name}</strong>
       </p>
+      {user.isGuest ? (
+        <span className="rounded-full bg-butter px-3 py-1 text-xs font-bold tracking-[0.06em] uppercase">
+          Guest
+        </span>
+      ) : null}
       <SignOutButton />
     </div>
   );

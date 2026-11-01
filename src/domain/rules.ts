@@ -15,6 +15,9 @@ export const VOTER_NAME_MAX = 40;
  */
 export const DECLINE_UNDO_WINDOW_MS = 10_000;
 
+/** A guest's sandbox (anonymous user + sample polls) is deleted after this. */
+export const GUEST_SANDBOX_TTL_MS = 24 * 60 * 60 * 1000;
+
 /** DiceBear "micah" background tints (hex without #, as DiceBear takes them). */
 export const AVATAR_TINTS = ["f8c9b9", "cbe2d8", "f6e0a4", "e3d2f2"] as const;
 export type AvatarTint = (typeof AVATAR_TINTS)[number];
