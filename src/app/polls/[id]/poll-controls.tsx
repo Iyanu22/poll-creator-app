@@ -11,6 +11,7 @@ import {
   CopyLinkButton,
   CopyResultButton,
 } from "@/components/copy-link-button";
+import { deadlinePresets, type DeadlinePreset } from "@/lib/deadline-presets";
 import { endVotingAction, reopenVotingAction } from "./actions";
 
 const subscribe = () => () => {};
@@ -125,35 +126,8 @@ export function PollControls({
   );
 }
 
-interface Preset {
-  id: string;
-  label: string;
-  closesAt: Date;
-}
-
 /** Reopening needs a new deadline: an open poll always has a future one. */
-function presets(now: Date): Preset[] {
-  const at = (days: number, hour: number) => {
-    const d = new Date(now);
-    d.setDate(d.getDate() + days);
-    d.setHours(hour, 0, 0, 0);
-    return d;
-  };
-  const list: Preset[] = [
-    { id: "1h", label: "In 1 hour", closesAt: new Date(now.getTime() + 36e5) },
-    {
-      id: "3h",
-      label: "In 3 hours",
-      closesAt: new Date(now.getTime() + 3 * 36e5),
-    },
-  ];
-  // "Tonight" only makes sense with a decent stretch of evening left
-  if (now.getHours() < 20) {
-    list.push({ id: "tonight", label: "Tonight at 9 PM", closesAt: at(0, 21) });
-  }
-  list.push({ id: "tomorrow", label: "Tomorrow at 7 PM", closesAt: at(1, 19) });
-  return list;
-}
+const REOPEN_PRESETS = ["1h", "3h", "tonight", "tomorrow"] as const;
 
 function ReopenVoting({
   pollId,
@@ -163,14 +137,14 @@ function ReopenVoting({
   onReopened: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [options, setOptions] = useState<Preset[]>([]);
+  const [options, setOptions] = useState<DeadlinePreset[]>([]);
   const [choice, setChoice] = useState("1h");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function open() {
     // Computed on open, in the creator's own timezone
-    setOptions(presets(new Date()));
+    setOptions(deadlinePresets(new Date(), REOPEN_PRESETS));
     setChoice("1h");
     setError(null);
     dialogRef.current?.showModal();

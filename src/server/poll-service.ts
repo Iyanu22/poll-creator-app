@@ -18,6 +18,11 @@ import {
   resolveRecast,
   RuleError,
 } from "@/domain/poll-machine";
+import {
+  validateDraft,
+  type DraftErrors,
+  type PollDraft,
+} from "@/domain/poll-draft";
 import type { AvatarTint } from "@/domain/rules";
 
 export interface VoterIdentity {
@@ -172,6 +177,37 @@ export async function castBallot(
 }
 
 // ── Poll lifecycle (creator only) ────────────────────────────────────────
+
+/**
+ * Creates a poll from a draft. Validates again with the same rules the form
+ * used, so a hand-crafted request can't create what the form wouldn't.
+ */
+export async function createPoll(
+  creatorId: string,
+  draft: PollDraft,
+  now = new Date(),
+): Promise<{ pollId: string } | { errors: DraftErrors }> {
+  const result = validateDraft(draft, now);
+  if (!result.ok) return { errors: result.errors };
+  const { options: labels, ...poll } = result.poll;
+
+  return db.transaction(async (tx) => {
+    const [created] = await tx
+      .insert(polls)
+      .values({ ...poll, creatorId, createdAt: now, updatedAt: now })
+      .returning({ id: polls.id });
+    await tx.insert(options).values(
+      labels.map((label, position) => ({
+        pollId: created.id,
+        label,
+        position,
+        source: "creator" as const,
+        createdAt: now,
+      })),
+    );
+    return { pollId: created.id };
+  });
+}
 
 export async function endVoting(
   pollId: string,

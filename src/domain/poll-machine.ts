@@ -195,7 +195,8 @@ export function resolveRecast(
 
 // ── Suggestions ──────────────────────────────────────────────────────────
 
-const normalizeLabel = (label: string) =>
+/** Labels compare case- and spacing-insensitively: "Jaws" = " jaws ". */
+export const normalizeLabel = (label: string) =>
   label.trim().replace(/\s+/g, " ").toLocaleLowerCase();
 
 export function assertCanSuggest(
