@@ -1,0 +1,160 @@
+/* Brand tokens + Tailwind theme mapping live in starter/ and stay untouched;
+   adaptations to the brand kit are layered here so the diff stays visible. */
+@import "../../starter/tailwind.css";
+
+/* next/font self-hosts Gabarito and Karla under generated family names,
+   exposed as --font-gabarito / --font-karla on <html>. Point the brand
+   font tokens at them (unlayered, so this wins over tokens.css). */
+:root {
+  --font-display: var(--font-gabarito), system-ui, -apple-system, sans-serif;
+  --font-body: var(--font-karla), system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-cream);
+    color: var(--color-cocoa);
+    font-family: var(--font-body);
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      /* Staggered reveals use delays: drop them too, so the finished
+         state shows at once rather than piece by piece */
+      animation-delay: 0ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* The voter's confirmation lands like a stamp: once, right after casting.
+   Reduced motion gets the same heading, just without the press. */
+@keyframes stamp-in {
+  0% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.97);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ── The reveal ──────────────────────────────────────────────────────────
+   Plays once per device, when [data-reveal] is set on the result card (see
+   components/reveal-once). The markup is always the finished state; these
+   animations only replay how it got there. --stamp-at is set per card from
+   the winner's vote count, so the name lands right after the last tick. */
+
+@keyframes tick-light {
+  from {
+    background-color: var(--color-tangerine-deep);
+    transform: scaleY(0.5);
+  }
+  60% {
+    transform: scaleY(1.5);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes ribbon-drop {
+  from {
+    transform: translateY(-120%);
+  }
+}
+
+@keyframes burst {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(1);
+  }
+}
+
+[data-reveal] .reveal-tick {
+  animation: tick-light 260ms ease-out both;
+  animation-delay: calc(200ms + var(--i) * 90ms);
+}
+
+[data-reveal] .reveal-bar {
+  transform-origin: left;
+  animation: grow-x 900ms ease-out 200ms both;
+}
+
+[data-reveal] .reveal-stamp {
+  animation: stamp-in 420ms ease-out both;
+  animation-delay: var(--stamp-at);
+}
+
+[data-reveal] .reveal-ribbon {
+  animation: ribbon-drop 300ms ease-out both;
+  animation-delay: calc(var(--stamp-at) + 150ms);
+}
+
+[data-reveal] .reveal-after {
+  animation: fade-up 300ms ease-out both;
+  animation-delay: calc(var(--stamp-at) + 200ms);
+}
+
+.reveal-burst {
+  display: none;
+}
+
+[data-reveal] .reveal-burst {
+  display: block;
+  animation: burst 700ms ease-out both;
+  animation-delay: calc(var(--stamp-at) + 250ms);
+}
+
+/* The burst is pure decoration: under reduced motion it never appears */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] .reveal-burst {
+    display: none;
+  }
+}
