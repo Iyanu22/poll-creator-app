@@ -4,9 +4,9 @@ Group-decision polls that live in the group chat: no accounts for voters, honest
 
 **Challenge:** [Tiebreak on Frontend Mentor](https://www.frontendmentor.io/challenges/poll-creator-app)
 
-**Live URL:** _not deployed yet_
+**Live URL:** https://poll-creator-app-nine.vercel.app
 
-> **To fill in after deploying:** the live URL, and a `screenshot.png` of the live results or the reveal.
+![Tiebreak results](./poll-creator-app.png)
 
 ---
 
@@ -25,7 +25,7 @@ Tiebreak is a full-stack build: real creator accounts, a Postgres database, publ
 | Authentication | Better Auth: Google and GitHub OAuth for creators, anonymous accounts for guest mode |
 | Live updates | Pusher Channels push, with a 5-second polling fallback |
 | Avatars | `@dicebear/core` + `@dicebear/collection` (micah), rendered on the server |
-| Hosting | Vercel (planned) |
+| Hosting | Vercel, with functions in `iad1` next to the Neon database (US East) |
 | Styling | Tailwind CSS v4 mapped onto the brand kit's tokens |
 | Testing | Vitest for the pure domain logic (state machine, results maths, drafts, timezones) |
 
@@ -50,7 +50,7 @@ Tiebreak is a full-stack build: real creator accounts, a Postgres database, publ
 
 **What I'd do differently:**
 
-> **To fill in.**
+I'd test on a phone as soon as the vote page works, to check responsiveness across different screen sizes. I only tested on one Android phone, besides the dev tools in the desktop browser.
 
 ### The Reveal
 
@@ -76,7 +76,7 @@ Tiebreak is a full-stack build: real creator accounts, a Postgres database, publ
 
 **What I'd do differently:**
 
-> **To fill in.**
+I'd allow voters to see the names of those who have voted, once they've successfully voted themselves.
 
 ### First Run
 
@@ -90,10 +90,6 @@ Tiebreak is a full-stack build: real creator accounts, a Postgres database, publ
 - **The in-between state** (one open poll, zero votes) features that poll with "Drop the link in your group chat. Votes show up here the moment they land."
 
 **Why I chose this approach:** designing backwards from the success case (a link sitting in a group chat), every first-run element points at that link. Typing the question is the quickest way to start, and the example shows the payoff without faking data.
-
-**What I'd do differently:**
-
-> **To fill in.**
 
 ### Product Rules I Decided
 
@@ -118,7 +114,7 @@ Tiebreak is a full-stack build: real creator accounts, a Postgres database, publ
 
 ## Development Journey
 
-> **To fill in:** this section is your story. The facts below are from the build log, to draw on.
+I picked Tiebreak because I wanted to build something real, not just a static page: accounts, a database and live updates. The core features came together faster than I expected; deploying was the hardest part. Most problems weren't in my code but in configuration: a wrong URL here, a cut-off secret there. I learned to read error messages carefully before changing anything. I'm proudest of building a full-stack project from scratch.
 
 **Notable turns during the build:**
 
@@ -131,6 +127,12 @@ Tiebreak is a full-stack build: real creator accounts, a Postgres database, publ
   - Disabled buttons dropped keyboard focus while actions ran, so they became `aria-disabled`.
   - Undo was briefly unclickable while the page refreshed.
   - Enter-to-add-an-option lost keystrokes typed before the next frame, so it now uses `flushSync`.
+- **Deploying taught its own lessons:**
+  - The first Vercel build failed on an invalid `BETTER_AUTH_URL`.
+  - Google sign-in returned `invalid_client` because the pasted client secret had been cut short.
+  - Each OAuth provider needs the production callback URL registered alongside the localhost one.
+  - Database queries occasionally failed when a WebSocket connection to Neon dropped while opening. Opening a connection now gets one quick retry. That's safe because nothing has reached the database yet.
+  - Files checked out with Windows line endings broke the formatter, so `.gitattributes` now pins LF.
 
 ### Session Breakdown
 
@@ -140,6 +142,7 @@ Tiebreak is a full-stack build: real creator accounts, a Postgres database, publ
 | 2 (Oct 31) | Foundations | Next.js scaffold, schema and state machine with tests, Neon migration, Google/GitHub sign-in |
 | 3 (Nov 1) | Core flows | Guest sandbox, dashboard, creator poll page with moderation, vote page, live updates via Pusher |
 | 4 (Nov 1–2) | Design challenges and polish | Poll creation, share step and first run; the reveal and tiebreaker; landing page, titles, 404s, skip link |
+| 5 (Nov 2–3) | Deploy | README, GitHub and Vercel deploy, production OAuth, database connection retry |
 
 ---
 
@@ -151,7 +154,9 @@ I built this with Claude (Claude Code) as a pair. I made the product and design 
 
 - **The live results screen:** `preview.jpg` shows the crew's avatars while voting is open, and that was the recommendation. I chose a **count only**, keeping the rule that nobody is identified until the poll settles.
 
-> **To fill in:** how you used AI, what worked well, what you learned, and any other moments you redirected it.
+### How I Used AI
+
+I used AI as a collaborator for brainstorming and implementation, while I made the design decisions and handled the product thinking, engineering and review.
 
 ---
 
@@ -177,47 +182,52 @@ Planned, not built yet. The link preview image for a poll is still to come.
 
 ## Self-Assessment
 
-> **To fill in:** the ratings are yours to give. The notes are facts from testing.
+I'd rate myself 8 out of 10. Next, I'm focusing on making the app more scalable, refining its design decisions, and making it responsive across all screens.
+
+I ran the app on the live site with real votes, testing every feature and leaving no stone unturned.
 
 | Category | Rating | Notes |
 |----------|--------|-------|
-| **Works for real users** | /5 | End-to-end locally; not deployed yet |
-| **The vote page** | /5 | Not yet checked at 320–375px on a real phone |
-| **Honest results** | /5 | Tally, relative bars, counts with every percentage, ties in words, 20-voter threshold |
-| **State machine integrity** | /5 | Every transition is server-side, in locked transactions; 68 unit tests |
-| **The reveal** | /5 | Once-per-device motion, tie flow; reduced motion is coded but hasn't been seen in a browser |
-| **Design quality** | /5 | |
-| **Responsive design** | /5 | Desktop checked; small phones not yet |
-| **Performance** | /5 | About 2.5s per action locally against a US-East database; needs measuring when deployed |
-| **Accessibility** | /5 | Keyboard paths, focus management, live regions and skip link built; no screen-reader pass yet |
-| **Landing page & guest experience** | /5 | |
+| **Works for real users** | 4/5 | Deployed on Vercel; sign-in, guest mode and voting run against the production database |
+| **The vote page** | 4/5 | Checked on one Android phone and in desktop dev tools |
+| **Honest results** | 4/5 | Tally, relative bars, counts with every percentage, ties in words, 20-voter threshold |
+| **State machine integrity** | 4/5 | Every transition is server-side, in locked transactions; 74 unit tests |
+| **The reveal** | 4/5 | Once-per-device motion, tie flow; reduced motion is coded but hasn't been seen in a browser |
+| **Design quality** | 4/5 | |
+| **Responsive design** | 4/5 | Desktop and one Android phone checked; other devices not yet |
+| **Performance** | 4/5 | Functions run in the same region as the database; Lighthouse performance 96–100 on mobile and desktop |
+| **Accessibility** | 4/5 | Keyboard paths, focus management, live regions and skip link built; no screen-reader pass yet |
+| **Landing page & guest experience** | 4/5 | |
 
 ### Lighthouse Scores
 
-> **To fill in after deploying.** Run it on the vote page, not just the landing page.
+Measured on the live site with Lighthouse 13.5, Nov 4, 2026. Mobile is an emulated Moto G Power on slow 4G.
 
-| Category | Score |
-|----------|-------|
-| Performance | |
-| Accessibility | |
-| Best Practices | |
-| SEO | |
+| Page | Device | Performance | Accessibility | Best Practices | SEO |
+|------|--------|-------------|---------------|----------------|-----|
+| Landing (`/`) | Mobile | 100 | 100 | 100 | 100 |
+| Landing (`/`) | Desktop | 100 | 100 | 100 | 100 |
+| Creator dashboard (`/polls`) | Mobile | 96 | 100 | 100 | 100 |
+| Creator dashboard (`/polls`) | Desktop | 100 | 100 | 100 | 100 |
+| Vote page (`/p/…`) | Mobile | 96 | 100 | 100 | 91 |
+| Vote page (`/p/…`) | Desktop | 100 | 100 | 100 | 91 |
+
+The vote page's SEO 91 is one flagged audit, "no meta description." The description is there, but the vote page's title comes from the poll, so Next.js streams that page's metadata after the head to keep the first paint fast, and Lighthouse only looks in the head. Link-preview bots such as WhatsApp's get it in the head, which is what matters for a link dropped in the chat.
 
 ### Strengths
 
-> **To fill in.**
+Designing a full-stack application from scratch, deploying it online and making it as functional as possible, figuring it all out with the help of AI as a collaborator.
 
 ### Areas for Improvement
 
-> **To fill in.**
+Building more full-stack projects to strengthen my skills in database management and backend development.
 
 ---
 
 ## Known Limitations
 
-- **Not deployed yet.** Production OAuth callback URLs and Google sign-in still need a final check.
 - **Not yet verified:**
-  - layouts at 320–375px on a real phone;
+  - layouts on devices other than one Android phone, such as iPhones and the smallest (320px) screens;
   - a real screen-reader pass;
   - the reduced-motion reveal, seen in a browser;
   - the polling fallback, the reconnect catch-up and the automatic flip to the closed state at the deadline. These are coded but haven't been watched happening.
@@ -231,7 +241,7 @@ Planned, not built yet. The link preview image for a poll is still to come.
 ## Running Locally
 
 ```bash
-git clone [your-repo-url]
+git clone https://github.com/Iyanu22/poll-creator-app.git
 cd poll-creator-app
 pnpm install
 
