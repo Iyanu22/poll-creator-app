@@ -1,7 +1,9 @@
 // The server-side referee. Every write runs in a transaction that locks the
-// poll row first (SELECT … FOR UPDATE), applies lazy settling, then checks
-// the transition with the pure rules in domain/poll-machine. A vote racing
-// "End voting" therefore sees the poll either before or after, never mid-way.
+// poll row first, applies lazy settling, then checks the transition with the
+// pure rules in domain/poll-machine. Votes share the lock (FOR SHARE) so a
+// chat voting at once isn't queued; everything else owns it (FOR UPDATE).
+// A vote racing "End voting" therefore sees the poll either before or after,
+// never mid-way.
 
 import { and, eq, lte, max, sql } from "drizzle-orm";
 import { db, type Tx } from "@/db";
@@ -45,6 +47,23 @@ async function lockPoll(tx: Tx, pollId: string, now: Date): Promise<Poll> {
   if (!settlement) return poll;
   await tx.update(polls).set(settlement).where(eq(polls.id, pollId));
   return { ...poll, ...settlement };
+}
+
+/**
+ * A vote only needs the poll to hold still, not to own it. A shared lock
+ * lets ballots on one poll land in parallel, yet still waits for (and holds
+ * off) End voting, reopening and moderation, which lock FOR UPDATE. A shared
+ * lock can't safely be upgraded to write, so an expired poll is settled in
+ * memory here (the vote is refused) and recorded by the next read.
+ */
+async function sharePoll(tx: Tx, pollId: string, now: Date): Promise<Poll> {
+  const [poll] = await tx
+    .select()
+    .from(polls)
+    .where(eq(polls.id, pollId))
+    .for("share");
+  if (!poll) throw new RuleError("POLL_NOT_FOUND", "That poll doesn't exist.");
+  return { ...poll, ...expiredSettlement(poll, now) };
 }
 
 /** Someone else's poll is indistinguishable from a missing one. */
@@ -118,17 +137,43 @@ export async function settleExpired(
 
 // ── Voting ───────────────────────────────────────────────────────────────
 
+interface CastInput {
+  pollId: string;
+  voterToken: string;
+  voter: VoterIdentity;
+  optionIds: string[];
+}
+
 export async function castBallot(
-  input: {
-    pollId: string;
-    voterToken: string;
-    voter: VoterIdentity;
-    optionIds: string[];
-  },
+  input: CastInput,
   now = new Date(),
 ): Promise<{ ballotId: string; replayed: boolean }> {
+  try {
+    return await castOnce(input, now);
+  } catch (error) {
+    // Votes run in parallel, so a double tap can race itself past the
+    // replay check; the database's one-ballot rule stops the second. Run
+    // it again, and the replay check answers it like any other retry.
+    if (!violates(error, "ballots_one_per_voter")) throw error;
+    return castOnce(input, now);
+  }
+}
+
+/** Whether a failed query broke the named unique constraint. */
+function violates(error: unknown, constraint: string): boolean {
+  for (let e = error; e instanceof Error; e = e.cause) {
+    const pg = e as { code?: string; constraint?: string };
+    if (pg.code === "23505" && pg.constraint === constraint) return true;
+  }
+  return false;
+}
+
+function castOnce(
+  input: CastInput,
+  now: Date,
+): Promise<{ ballotId: string; replayed: boolean }> {
   return db.transaction(async (tx) => {
-    const poll = await lockPoll(tx, input.pollId, now);
+    const poll = await sharePoll(tx, input.pollId, now);
 
     // Replay check first: a voter retrying a cast that already landed gets
     // success, even if the poll has since settled.

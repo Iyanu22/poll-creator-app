@@ -1,6 +1,13 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import samplePolls from "../data/sample-polls.json";
 import { POLL_CHANGED } from "../src/lib/realtime";
+import {
+  castVote,
+  newPage,
+  openGuestPizza,
+  pizza,
+  voteAsSomeoneElse,
+} from "./helpers";
 
 // The vote page's core promise, checked from outside like any visitor:
 // until you vote on an open poll, no page, refetch or live update carries a
@@ -8,8 +15,6 @@ import { POLL_CHANGED } from "../src/lib/realtime";
 //
 // It writes only to a throwaway guest's sandbox (swept after 24 hours): two
 // ballots on its copy of pizza night, then End voting.
-
-const pizza = samplePolls.polls.find((p) => p.title.startsWith("Pizza night"))!;
 
 // Suggesters' names are public on purpose ("suggested by Priya"), and the
 // creator's first name heads the page, so only the other voters can leak
@@ -57,9 +62,11 @@ function watch(page: Page, origin: string) {
       );
     }
   });
-  page.on("websocket", (ws) =>
-    ws.on("framereceived", ({ payload }) => frames.push(String(payload))),
-  );
+  page.on("websocket", (ws) => {
+    // Pusher's, not the dev server's hot reload
+    if (!/pusher\.com/.test(ws.url())) return;
+    ws.on("framereceived", ({ payload }) => frames.push(String(payload)));
+  });
   return {
     frames: () => frames,
     /** What arrived since the last drain. */
@@ -70,26 +77,6 @@ function watch(page: Page, origin: string) {
       return taken;
     },
   };
-}
-
-async function newPage(browser: Browser) {
-  return (await browser.newContext()).newPage();
-}
-
-async function castVote(page: Page, name: string) {
-  // The ballot's, not the closed "Suggest something else" dialog's
-  await page.getByLabel("Your name", { exact: true }).first().fill(name);
-  await page
-    .getByRole("group", { name: "Your pick" })
-    .getByRole("radio")
-    .first()
-    .check({ force: true }); // the radio is visually hidden; its label shows
-  await page.getByRole("button", { name: /^Cast my vote for/ }).click();
-  await page
-    .getByRole("dialog", { name: "Lock it in?" })
-    .getByRole("button", { name: "Cast it" })
-    .click();
-  await expect(page.getByText(`You're in, ${name}.`)).toBeVisible();
 }
 
 async function until(check: () => boolean, ms: number) {
@@ -106,16 +93,7 @@ test("no count or name reaches a visitor before they vote", async ({
 }) => {
   const origin = new URL(baseURL!).origin;
 
-  // The creator: a guest with a private copy of the sample polls
-  const creator = await newPage(browser);
-  await creator.goto("/");
-  await creator
-    .getByRole("button", { name: "Try it with sample polls" })
-    .click();
-  await creator.waitForURL("**/polls");
-  await creator.getByRole("link", { name: pizza.title }).first().click();
-  await creator.waitForURL(/\/polls\/[a-z0-9]+$/);
-  const votePath = new URL(creator.url()).pathname.replace("/polls/", "/p/");
+  const { creator, votePath } = await openGuestPizza(browser);
 
   // ── 1. Not voted yet: the ballot, nothing else ──────────────────────
   const watcher = await newPage(browser);
@@ -143,9 +121,7 @@ test("no count or name reaches a visitor before they vote", async ({
       res.request().headers()["rsc"] === "1",
     { timeout: 20_000 },
   );
-  const other = await newPage(browser);
-  await other.goto(votePath);
-  await castVote(other, EARLY_VOTER);
+  await voteAsSomeoneElse(browser, votePath, EARLY_VOTER);
   otherVoted = true;
   await refetched;
 
@@ -170,19 +146,26 @@ test("no count or name reaches a visitor before they vote", async ({
 
   // ── 2. Voted, still open: counts, never names ───────────────────────
   await castVote(watcher, WATCHER);
-  const voted = await seen.drain();
-  const votedText = [await watcher.locator("main").innerText()];
+  // The page can show the voted view a moment before Playwright has
+  // recorded the response that carried it, so keep collecting until then
+  const votedBodies: string[] = [];
   // The control: the same detectors now find counts, so they aren't blind
-  expect(
-    leaks(COUNT_IN_DATA, voted.bodies).length,
-    "counts in data",
-  ).toBeGreaterThan(0);
+  await expect
+    .poll(
+      async () => {
+        votedBodies.push(...(await seen.drain()).bodies);
+        return leaks(COUNT_IN_DATA, votedBodies).length;
+      },
+      { message: "counts in data", timeout: 10_000 },
+    )
+    .toBeGreaterThan(0);
+  const votedText = [await watcher.locator("main").innerText()];
   expect(
     leaks(COUNT_IN_TEXT, votedText).length,
     "counts on screen",
   ).toBeGreaterThan(0);
   expect(
-    leaks(HIDDEN_NAMES.map(named), [...voted.bodies, ...votedText]),
+    leaks(HIDDEN_NAMES.map(named), [...votedBodies, ...votedText]),
     "voter names",
   ).toEqual([]);
 

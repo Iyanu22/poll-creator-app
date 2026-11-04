@@ -8,7 +8,7 @@ import {
   useState,
   useTransition,
 } from "react";
-import { POLL_CHANGED, pollChannel } from "@/lib/realtime";
+import { POLL_CHANGED, pollChannel, refetchDelay } from "@/lib/realtime";
 
 // Keeps a poll page current without a manual refresh. Pusher says "this poll
 // changed" and the page refetches through our server (router.refresh keeps
@@ -42,12 +42,13 @@ export function LivePoll({
   const [mode, setMode] = useState<Mode>("connecting");
   const refreshTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Coalesce bursts (ten votes in a second) into one refetch
+  // Coalesce bursts (ten votes in a second) into one refetch, spread out so
+  // every open page doesn't refetch on the same tick
   const refresh = useEffectEvent(() => {
     clearTimeout(refreshTimer.current);
     refreshTimer.current = setTimeout(
       () => startTransition(() => router.refresh()),
-      250,
+      refetchDelay(),
     );
   });
 
@@ -74,7 +75,12 @@ export function LivePoll({
         let missedEvents = false;
         pusher.connection.bind(
           "state_change",
-          ({ current }: { current: string }) => {
+          ({ previous, current }: { previous: string; current: string }) => {
+            // Any drop can lose events, even a blip that goes straight back
+            // through "connecting" without ever being "unavailable"
+            if (previous === "connected" && current !== "connected") {
+              missedEvents = true;
+            }
             if (current === "connected") {
               setMode("live");
               // Events sent while we were away are gone: catch up once
@@ -82,7 +88,6 @@ export function LivePoll({
               missedEvents = false;
             } else if (current === "unavailable" || current === "failed") {
               setMode("polling");
-              missedEvents = true;
             }
           },
         );
@@ -94,6 +99,17 @@ export function LivePoll({
       disconnect();
     };
   }, [pollId]);
+
+  // A phone that backgrounds the tab (voter switches to the group chat) can
+  // sleep through events while the socket still looks connected, so no
+  // state change ever fires: catch up whenever the page is shown again
+  useEffect(() => {
+    const onShown = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", onShown);
+    return () => document.removeEventListener("visibilitychange", onShown);
+  }, []);
 
   // Fallback: poll while the tab is visible and push isn't working
   useEffect(() => {

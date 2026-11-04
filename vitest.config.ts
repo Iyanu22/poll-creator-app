@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   resolve: {
@@ -7,5 +7,7 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.test.ts"],
+    // Database tests write to a real Postgres: `pnpm test:db`
+    exclude: [...configDefaults.exclude, "src/**/*.db.test.ts"],
   },
 });

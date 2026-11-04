@@ -27,7 +27,7 @@ Tiebreak is a full-stack build: real creator accounts, a Postgres database, publ
 | Avatars | `@dicebear/core` + `@dicebear/collection` (micah), rendered on the server |
 | Hosting | Vercel, with functions in `iad1` next to the Neon database (US East) |
 | Styling | Tailwind CSS v4 mapped onto the brand kit's tokens |
-| Testing | Vitest for the pure domain logic (state machine, results maths, drafts, timezones); Playwright for an outside check of the ballot-first rule, run against the live site |
+| Testing | Vitest for the pure domain logic (state machine, results maths, drafts, timezones) and for vote locking against a real Postgres; Playwright for outside checks of the ballot-first rule and live catch-up, run against the live site |
 
 ---
 
@@ -95,6 +95,7 @@ I'd allow voters to see the names of those who have voted, once they've successf
 
 - **Reopening requires a new closing time.** The confirm dialog offers presets (in 1 hour, in 3 hours, tonight, tomorrow). The invariant: an open poll always has a future deadline, so automatic closing is always true.
 - **One vote per browser.** An httpOnly cookie gives each browser a voter token, and the database enforces one ballot per token per poll. Casting is idempotent: a refresh or a double tap replays the same vote rather than adding one, while a different choice from the same browser is rejected ("No takebacks"). A determined friend with two browsers gets two votes. For pizza night, that's the right bar.
+- **A chat can vote at once.** Votes take a shared lock on the poll, so they land in parallel rather than queueing; End voting, reopening and moderation take an exclusive one, so a vote still sees the poll either before or after End voting, never mid-way. Parallel votes let a double tap race itself past the replay check, so the database's one-ballot rule catches the second tap and it's answered as a replay. A test against a real database covers each of these.
 - **Past 20 voters, the leader's tally becomes a bar.** Up to 20, it's one tick per voter. Beyond that, ticks turn to noise, so it switches to a share bar; the counts stay in text either way.
 - **Percentages on multi-choice polls are out of voters, not picks:** "picked by 3 of 5 voters".
 - **Declined suggestions** disappear from the queue, with an 8-second undo toast; the server allows 10 seconds. A declined idea can be suggested again later, and a duplicate of a live or pending option can't.
@@ -143,6 +144,7 @@ I picked Tiebreak because I wanted to build something real, not just a static pa
 | 3 (Nov 1) | Core flows | Guest sandbox, dashboard, creator poll page with moderation, vote page, live updates via Pusher |
 | 4 (Nov 1–2) | Design challenges and polish | Poll creation, share step and first run; the reveal and tiebreaker; landing page, titles, 404s, skip link |
 | 5 (Nov 2–3) | Deploy | README, GitHub and Vercel deploy, production OAuth, database connection retry |
+| 6 (Nov 4) | Review follow-up | Outside check of the ballot-first rule; live catch-up after reconnects and tab switches, parallel votes and spread-out refetches, from a colleague's review |
 
 ---
 
@@ -171,7 +173,8 @@ I used AI as a collaborator for brainstorming and implementation, while I made t
 - **Implementation highlights:**
   - After each write, the server sends a data-free "poll changed" event on the poll's Pusher channel. It's sent after the response, so nobody waits on it, and a Pusher outage can never fail a vote.
   - Pages refetch through the server, which decides what each viewer may see, so the ballot-first rule holds.
-  - Bursts of events are batched into one refetch, the page catches up once after a dropped connection, and it falls back to polling every 5 seconds.
+  - Bursts of events are batched into one refetch, spread over 250–600ms so every open page doesn't hit the server on the same tick.
+  - Pusher doesn't replay missed events, so a page catches up after any dropped connection and whenever it's shown again: a phone coming back from the group chat can sleep through events while its socket still looks connected. If push fails outright, it falls back to polling every 5 seconds.
   - One polite live region announces the race in words, at most every 10 seconds.
 
 **2. Share card**
@@ -252,7 +255,7 @@ pnpm dev
 
 `docs/SETUP.md` walks through getting each value: Neon, the Better Auth secret, the Google and GitHub OAuth apps, and Pusher. Every one comes from a free tier.
 
-Other scripts: `pnpm test` (Vitest), `pnpm test:e2e` (Playwright, against a running app; set `BASE_URL` to check a deployment), `pnpm typecheck`, `pnpm lint`, `pnpm format`, `pnpm db:generate` after schema changes, `pnpm db:studio`.
+Other scripts: `pnpm test` (Vitest), `pnpm test:e2e` (Playwright, against a running app; set `BASE_URL` to check a deployment), `pnpm test:db` (locking tests; they write to the database in `.env.local` and clean up after themselves), `pnpm typecheck`, `pnpm lint`, `pnpm format`, `pnpm db:generate` after schema changes, `pnpm db:studio`.
 
 ### Environment Variables
 
