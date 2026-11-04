@@ -27,7 +27,7 @@ Tiebreak is a full-stack build: real creator accounts, a Postgres database, publ
 | Avatars | `@dicebear/core` + `@dicebear/collection` (micah), rendered on the server |
 | Hosting | Vercel, with functions in `iad1` next to the Neon database (US East) |
 | Styling | Tailwind CSS v4 mapped onto the brand kit's tokens |
-| Testing | Vitest for the pure domain logic (state machine, results maths, drafts, timezones) |
+| Testing | Vitest for the pure domain logic (state machine, results maths, drafts, timezones); Playwright for an outside check of the ballot-first rule, run against the live site |
 
 ---
 
@@ -39,7 +39,7 @@ Tiebreak is a full-stack build: real creator accounts, a Postgres database, publ
 
 **My approach:**
 
-- **The ballot comes first.** Until you've voted on an open poll, you see no counts at all. This is enforced on the server: the counts aren't in the page's data, so it can't be bypassed with dev tools.
+- **The ballot comes first.** Until you've voted on an open poll, you see no counts at all. This is enforced on the server: the counts aren't in the page's data, so it can't be bypassed with dev tools. A Playwright check (`e2e/ballot-first.e2e.ts`) verifies it from outside: it records every page, refetch and live update a visitor receives and asserts no counts or names before voting, counts after, names after close. With the rule deliberately broken, it fails.
 - **After voting, counts but never names.** You see the live race in counts, never who voted for what. Attribution appears only when the poll settles.
 - **The confirmation uses the identity you just gave.** It shows your chosen face and says "You're in, Priya. You backed Veggie supreme. No takebacks: your vote is locked in." It takes focus once, with a small stamp-in, then stays put on later visits.
 - **Return visits** show the same confirmation and the live counts. There's no second ballot.
@@ -252,7 +252,7 @@ pnpm dev
 
 `docs/SETUP.md` walks through getting each value: Neon, the Better Auth secret, the Google and GitHub OAuth apps, and Pusher. Every one comes from a free tier.
 
-Other scripts: `pnpm test` (Vitest), `pnpm typecheck`, `pnpm lint`, `pnpm format`, `pnpm db:generate` after schema changes, `pnpm db:studio`.
+Other scripts: `pnpm test` (Vitest), `pnpm test:e2e` (Playwright, against a running app; set `BASE_URL` to check a deployment), `pnpm typecheck`, `pnpm lint`, `pnpm format`, `pnpm db:generate` after schema changes, `pnpm db:studio`.
 
 ### Environment Variables
 
