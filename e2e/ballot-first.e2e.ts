@@ -38,30 +38,52 @@ const COUNT_IN_DATA = [
 const COUNT_IN_TEXT = [...COUNT_IN_DATA, /\d+%/];
 
 const named = (name: string) => new RegExp(`\\b${name}\\b`);
+/** What matched, and in which response («refetch /p/…») if it was one. */
 const leaks = (patterns: RegExp[], texts: string[]) =>
-  texts.flatMap((text) =>
-    patterns.flatMap((p) => text.match(p)?.[0] ?? []).slice(0, 3),
-  );
-
-/** Everything the server sends this page, plus Pusher's live messages. */
-function watch(page: Page, origin: string) {
-  let bodies: Promise<string>[] = [];
-  let frames: string[] = [];
-  page.on("response", (res) => {
-    const type = res.request().resourceType();
-    if (
-      (type === "document" || type === "fetch") &&
-      res.url().startsWith(origin)
-    ) {
-      // Faces are data URIs; their contents aren't the page's words
-      bodies.push(
-        res.text().then(
-          (body) => body.replace(/data:[^"'\s)]+/g, ""),
-          () => "",
-        ),
-      );
-    }
+  texts.flatMap((text) => {
+    const source = text.match(/^«(.*?)»/)?.[1];
+    return patterns
+      .flatMap((p) => text.match(p)?.[0] ?? [])
+      .slice(0, 3)
+      .map((match) => (source ? `${match} @ ${source}` : match));
   });
+
+/**
+ * Everything the server sends for the vote page (the page, its refetches,
+ * the vote itself), plus Pusher's live messages. Not other pages the
+ * browser prefetches: the landing page's example card has counts on purpose.
+ * Responses are captured on their way through, before the page gets them:
+ * reading them back from the browser afterwards can fail (Chrome may have
+ * dropped a streamed body), and a body that isn't read can't be checked.
+ */
+async function watch(page: Page, origin: string, votePath: string) {
+  let bodies: string[] = [];
+  let frames: string[] = [];
+  await page.route(
+    (url) => url.origin === origin && url.pathname === votePath,
+    async (route) => {
+      const type = route.request().resourceType();
+      if (type !== "document" && type !== "fetch") return route.continue();
+      const response = await route.fetch({ maxRedirects: 0 });
+      const body = await response.text();
+      // Tagged with where it came from, for the failure message. Faces are
+      // data URIs; their contents aren't the page's words.
+      const { pathname } = new URL(route.request().url());
+      const kind = route.request().headers()["next-action"]
+        ? "vote"
+        : route.request().headers()["rsc"]
+          ? "refetch"
+          : type;
+      bodies.push(
+        `«${kind} ${pathname}»` + body.replace(/data:[^"'\s)]+/g, ""),
+      );
+      // The body comes back decoded, so it's re-sent without its encoding
+      const headers = { ...response.headers() };
+      delete headers["content-encoding"];
+      delete headers["content-length"];
+      await route.fulfill({ status: response.status(), headers, body });
+    },
+  );
   page.on("websocket", (ws) => {
     // Pusher's, not the dev server's hot reload
     if (!/pusher\.com/.test(ws.url())) return;
@@ -70,8 +92,8 @@ function watch(page: Page, origin: string) {
   return {
     frames: () => frames,
     /** What arrived since the last drain. */
-    async drain() {
-      const taken = { bodies: await Promise.all(bodies), frames };
+    drain() {
+      const taken = { bodies, frames };
       bodies = [];
       frames = [];
       return taken;
@@ -97,7 +119,7 @@ test("no count or name reaches a visitor before they vote", async ({
 
   // ── 1. Not voted yet: the ballot, nothing else ──────────────────────
   const watcher = await newPage(browser);
-  const seen = watch(watcher, origin);
+  const seen = await watch(watcher, origin, votePath);
   await watcher.goto(votePath);
   await expect(
     watcher.getByRole("button", { name: /^Cast my vote/ }),
@@ -110,6 +132,15 @@ test("no count or name reaches a visitor before they vote", async ({
     type: "live updates",
     description: live ? "Pusher" : "polling fallback",
   });
+  // The page as it first arrives, checked on its own
+  const firstLoad = seen.drain();
+  expect(
+    firstLoad.bodies.some((b) => b.startsWith("«document")),
+    "the page was captured",
+  ).toBe(true);
+  expect(leaks(COUNT_IN_DATA, firstLoad.bodies), "counts in the page").toEqual(
+    [],
+  );
 
   // Someone else votes while the watcher sits on the ballot. The live
   // update makes the watcher's page refetch; that refetch is checked too.
@@ -125,15 +156,22 @@ test("no count or name reaches a visitor before they vote", async ({
   otherVoted = true;
   await refetched;
 
-  const before = await seen.drain();
+  const before = seen.drain();
   const beforeText = [await watcher.locator("main").innerText()];
-  expect(before.bodies.length).toBeGreaterThan(1); // the page and the refetch
-  expect(leaks(COUNT_IN_DATA, before.bodies), "counts in page data").toEqual(
+  expect(
+    before.bodies.some((b) => b.startsWith("«refetch")),
+    "the refetch was captured",
+  ).toBe(true);
+  expect(leaks(COUNT_IN_DATA, before.bodies), "counts in the refetch").toEqual(
     [],
   );
   expect(leaks(COUNT_IN_TEXT, beforeText), "counts on screen").toEqual([]);
   expect(
-    leaks(HIDDEN_NAMES.map(named), [...before.bodies, ...beforeText]),
+    leaks(HIDDEN_NAMES.map(named), [
+      ...firstLoad.bodies,
+      ...before.bodies,
+      ...beforeText,
+    ]),
     "voter names",
   ).toEqual([]);
 
@@ -146,26 +184,19 @@ test("no count or name reaches a visitor before they vote", async ({
 
   // ── 2. Voted, still open: counts, never names ───────────────────────
   await castVote(watcher, WATCHER);
-  // The page can show the voted view a moment before Playwright has
-  // recorded the response that carried it, so keep collecting until then
-  const votedBodies: string[] = [];
-  // The control: the same detectors now find counts, so they aren't blind
-  await expect
-    .poll(
-      async () => {
-        votedBodies.push(...(await seen.drain()).bodies);
-        return leaks(COUNT_IN_DATA, votedBodies).length;
-      },
-      { message: "counts in data", timeout: 10_000 },
-    )
-    .toBeGreaterThan(0);
+  const voted = seen.drain();
   const votedText = [await watcher.locator("main").innerText()];
+  // The control: the same detectors now find counts, so they aren't blind
+  expect(
+    leaks(COUNT_IN_DATA, voted.bodies).length,
+    "counts in data",
+  ).toBeGreaterThan(0);
   expect(
     leaks(COUNT_IN_TEXT, votedText).length,
     "counts on screen",
   ).toBeGreaterThan(0);
   expect(
-    leaks(HIDDEN_NAMES.map(named), [...votedBodies, ...votedText]),
+    leaks(HIDDEN_NAMES.map(named), [...voted.bodies, ...votedText]),
     "voter names",
   ).toEqual([]);
 
